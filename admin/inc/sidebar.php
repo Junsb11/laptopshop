@@ -40,12 +40,12 @@
                 </li>
                 <li><a class="menuitem">Quản lý nhân viên</a>
                     <ul class="submenu">
-                        <li><a href="xemtaikhoan.php">Xem nhân viên</a></li>   
+                        <li><a href="xemnhanvien.php">Xem nhân viên</a></li>   
                     </ul>
                 </li>
                 <li><a class="menuitem">Quản lý bảo hành</a>
                     <ul class="submenu">
-                        <li><a href="xemtaikhoan.php">Xem nhân viên</a></li>   
+                        <li><a href="xembaohanh.php">Xem nhân viên</a></li>   
                     </ul>
                 </li>
             </ul>

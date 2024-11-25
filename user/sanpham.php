@@ -137,7 +137,7 @@ $number_of_page = ceil($number_of_result / $results_per_page);
                                 <div class="input-group-append">
                                     <button class="btn btn-outline-primary" type="submit"><i class="fa fa-search"></i></button>
                                 </div>
-                            </div>
+                            </div>  
                         </form>
                         <div class="dropdown ml-4">
                             <button class="btn border dropdown-toggle" type="button" id="triggerId" data-toggle="dropdown" aria-haspopup="true"

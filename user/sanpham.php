@@ -12,7 +12,7 @@
 <?php
 include '../admin/connect.php';
 
-$sql_xemsp = "SELECT * FROM san_pham WHERE TrangThai = 1";
+$sql_xemsp = "SELECT * FROM san_pham WHERE so_luong >= 1";
 
 // Xử lý lọc theo giá
 $price_conditions = [];
@@ -61,7 +61,7 @@ switch ($sort) {
 }
 
 // Thực hiện câu truy vấn để lấy số lượng sản phẩm thỏa mãn điều kiện
-$count_query = "SELECT COUNT(*) AS total FROM san_pham WHERE TrangThai = 1";
+$count_query = "SELECT COUNT(*) AS total FROM san_pham WHERE so_luong >= 1";
 
 if (!empty($price_conditions)) {
     $count_query .= " AND (" . implode(" OR ", $price_conditions) . ")";

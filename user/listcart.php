@@ -68,14 +68,7 @@ include "./inc/navbar.php";
                         $tong += $ds['dongia'] * $ds['sl'];
                         } 
                     }
-                    ?>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td><button name="btnUpdate" class="btn btn-warning">Cập nhật</button></td>
-                        <td></td>
-                        <td></td>
-                    </tr>                     
+                    ?>                 
                     </tbody>
                 </table>
             </form>

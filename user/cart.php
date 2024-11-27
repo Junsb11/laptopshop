@@ -34,10 +34,12 @@ $result_sp = $stmt->get_result();
 
 // Kiểm tra nếu sản phẩm tồn tại
 if ($row_sp = $result_sp->fetch_assoc()) {
-    // Cập nhật hoặc thêm sản phẩm vào giỏ hàng
+    // Kiểm tra nếu sản phẩm đã có trong giỏ hàng
     if (isset($_SESSION['cart'][$masp])) {
+        // Nếu sản phẩm đã có, chỉ tăng số lượng
         $_SESSION['cart'][$masp]['sl'] += $quantity;
     } else {
+        // Nếu chưa có, thêm sản phẩm mới vào giỏ hàng
         $_SESSION['cart'][$masp] = array(
             "idsp" => $row_sp['MaSP'],
             "tensp" => $row_sp['TenSP'],
@@ -46,6 +48,7 @@ if ($row_sp = $result_sp->fetch_assoc()) {
             "hinhanh" => $row_sp['HinhAnh']
         );
     }
+    
     // Chuyển hướng đến giỏ hàng
     header("Location: listcart.php");
     exit;

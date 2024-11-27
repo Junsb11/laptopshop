@@ -85,15 +85,29 @@
                         </div>
                     </div>
                     <div class="card-footer d-flex justify-content-between bg-light border">
-                        <a href="chitietsp.php?id=<?php echo $product['MaSP']; ?>" class="btn btn-sm text-dark p-0">
+                        <a href="chitietsp.php?id=<?php echo $data['MaSP']; ?>" class="btn btn-sm text-dark p-0">
                             <i class="fas fa-eye text-primary mr-1"></i>Xem chi tiết
                         </a>
-                        <a href="cart.php?id=<?php echo $product['MaSP']; ?>" class="btn btn-sm text-dark p-0">
-                            <i class="fas fa-shopping-cart text-primary mr-1"></i>Thêm vào giỏ hàng
-                        </a>
-                        <a href="yeucaubaohanh.php?id=<?php echo $product['MaSP']; ?>" class="btn btn-sm text-dark p-0">
-                            <i class="fas fa-tools text-primary mr-1"></i>Yêu cầu bảo hành
-                        </a>
+                        <div class="input-group quantity mr-3" style="width: 130px;">
+                            <div class="input-group-btn">
+                                <button class="btn btn-primary btn-minus">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                            </div>
+                            <input type="text" class="form-control bg-secondary text-center" name="quantity" value="1" readonly>
+                            <div class="input-group-btn">
+                                <button class="btn btn-primary btn-plus" data-so-luong="<?php echo $data['so_luong']; ?>">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <form action="cart.php" method="get" id="cartForm-<?php echo $data['MaSP']; ?>">
+                            <input type="hidden" name="id" value="<?php echo $data['MaSP']; ?>">
+                            <input type="hidden" name="quantity" value="1" id="quantity-<?php echo $data['MaSP']; ?>">
+                            <button type="submit" class="btn btn-sm text-dark p-0">
+                                <i class="fas fa-shopping-cart text-primary mr-1"></i>Thêm vào giỏ hàng
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>

@@ -42,9 +42,6 @@
                         <a href="cart.php?id=<?php echo $product['MaSP']; ?>" class="btn btn-sm text-dark p-0">
                             <i class="fas fa-shopping-cart text-primary mr-1"></i>Thêm vào giỏ hàng
                         </a>
-                        <a href="warranty_request.php?id=<?php echo $product['MaSP']; ?>" class="btn btn-sm text-dark p-0">
-                            <i class="fas fa-tools text-primary mr-1"></i>Yêu cầu bảo hành
-                        </a>
                     </div>
                 </div>
             </div>

@@ -15,23 +15,16 @@ if (isset($_POST['btn_dangnhap'])) {
         $error_message = "Tên đăng nhập hoặc mật khẩu không được để trống.";
     } else {
         $sql_dn = "SELECT * from tai_khoan where TenDangNhap='$tendn' and MatKhau='$mk' and TrangThai=1";
-        $capcha = $_POST['txtcapcha'];
-        if ($capcha == $_SESSION['cap']) {
-            $result_dn = mysqli_query($conn, $sql_dn);
-            if (mysqli_num_rows($result_dn) > 0) {
-                $_SESSION['tendn'] = $tendn;
-                echo "<script> window.location.href='home.php'; </script>";
-            } else {
-                $error_message = "Tên đăng nhập hoặc mật khẩu không chính xác.";
-            }
+        $result_dn = mysqli_query($conn, $sql_dn);
+        if (mysqli_num_rows($result_dn) > 0) {
+            $_SESSION['tendn'] = $tendn;
+            echo "<script> window.location.href='home.php'; </script>";
         } else {
-            $error_message = "Mã xác nhận không chính xác.";
+            $error_message = "Tên đăng nhập hoặc mật khẩu không chính xác.";
         }
     }
 }
-
 ?>
-</div>
 
 <style>
 * {
@@ -109,26 +102,6 @@ if (isset($_POST['btn_dangnhap'])) {
     border-radius: 5px;
 }
 
-.capcha-container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-}
-.capcha-input {
-    width: 100%;
-    padding: 15px 10px;
-    border: 1px solid #7579ff;
-    border-radius: 5px;
-    font-size: 16px;
-}
-.capcha-display {
-    background-color: red;
-    color: yellow;
-    padding: 15px;
-    margin-left: 10px;
-    border-radius: 5px;
-}
-
 @media (max-width: 768px) {
     .form-tt {
         padding: 30px 20px;
@@ -148,10 +121,6 @@ if (isset($_POST['btn_dangnhap'])) {
         <form action="dangnhap.php" method="post" name="dang-ky">
             <input type="text" name="txttendn" placeholder="Nhập tên đăng nhập" required />
             <input type="password" name="txtmk" placeholder="Nhập mật khẩu" required />
-            <div class="capcha-container">
-                <input type="text" name="txtcapcha" class="capcha-input" placeholder="Mã xác nhận" required />
-                <div class="capcha-display"><?php echo $_SESSION['cap'];?></div>
-            </div>
             <div class="checkbox-container">
                 <input type="checkbox" id="checkbox" name="checkbox">
                 <label class="checkbox-text" for="checkbox">Nhớ đăng nhập lần sau</label>

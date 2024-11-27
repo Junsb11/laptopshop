@@ -19,12 +19,6 @@
                         <li><a href="xemdanhgia.php">Xem đánh giá</a></li>   
                     </ul>
                 </li>
-                <!-- <li><a class="menuitem">Quản lý thuế</a>
-                    <ul class="submenu">
-                        <li><a href="xemdanhsachthue.php">Xem danh sách thuế</a></li>
-                        <li><a href="themthue.php">Thêm mới thuế</a></li>
-                    </ul>
-                </li> -->
 				<li><a class="menuitem">Quản lý đơn hàng</a>
                     <ul class="submenu">
                         <li><a href="donhangchoxetduyet.php">Đơn chờ xét duyệt</a> </li>
@@ -42,6 +36,16 @@
                 <li><a class="menuitem">Quản lý tài khoản</a>
                     <ul class="submenu">
                         <li><a href="xemtaikhoan.php">Xem tài khoản</a></li>   
+                    </ul>
+                </li>
+                <li><a class="menuitem">Quản lý nhân viên</a>
+                    <ul class="submenu">
+                        <li><a href="xemnhanvien.php">Xem nhân viên</a></li>   
+                    </ul>
+                </li>
+                <li><a class="menuitem">Quản lý bảo hành</a>
+                    <ul class="submenu">
+                        <li><a href="xembaohanh.php">Xem nhân viên</a></li>   
                     </ul>
                 </li>
             </ul>

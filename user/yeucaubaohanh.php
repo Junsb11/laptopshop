@@ -2,6 +2,10 @@
 if (!isset($_SESSION)) {
     session_start();
 }
+if (!isset($_SESSION['tendn'])) {
+    header("Location: dangnhap.php");
+    exit();
+}
 include "./inc/header.php"; 
 include "./inc/navbar.php"; 
 ?>
@@ -24,6 +28,7 @@ include "./inc/navbar.php";
     <div class="row px-xl-5">
         <div class="col-lg-8 table-responsive mb-5">
             <?php 
+            // Hiển thị các sản phẩm yêu cầu bảo hành
             if (isset($_SESSION['warranty']) && count($_SESSION['warranty']) > 0) { ?>
                 <table class="table table-bordered text-center mb-0">
                     <thead class="bg-secondary text-dark">
@@ -53,6 +58,31 @@ include "./inc/navbar.php";
             <?php } else { ?>
                 <p class="text-center">Không có sản phẩm nào trong danh sách bảo hành.</p>
             <?php } ?>
+        </div>
+
+        <!-- Form yêu cầu bảo hành -->
+        <div class="col-lg-4">
+            <form method="POST" action="submit_warranty_request.php">
+                <div class="form-group">
+                    <label for="product_id">Chọn sản phẩm yêu cầu bảo hành</label>
+                    <select class="form-control" id="product_id" name="product_id" required>
+                        <?php
+                        if (isset($_SESSION['warranty']) && count($_SESSION['warranty']) > 0) {
+                            foreach ($_SESSION['warranty'] as $item) {
+                                echo "<option value='" . $item['idsp'] . "'>" . $item['tensp'] . "</option>";
+                            }
+                        }
+                        ?>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="reason">Lý do yêu cầu bảo hành</label>
+                    <textarea class="form-control" id="reason" name="reason" rows="4" required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block mt-3">Gửi yêu cầu bảo hành</button>
+            </form>
         </div>
     </div>
 </div>

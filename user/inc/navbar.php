@@ -61,6 +61,7 @@
                                 </div>
                             </div>
                             <a href="dsdonhang.php" class="nav-item nav-link">Quản lý lịch sử đơn hàng</a>
+                            <a href="dsbaohanh.php" class="nav-item nav-link">Quản lý lịch sử bảo hành</a>
                         </div>
                         
                         <div class="navbar-nav ml-auto py-0">

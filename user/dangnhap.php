@@ -29,7 +29,7 @@ if (isset($_POST['btn_dangnhap'])) {
         }
     }
 }
-include "Capcha.php";
+
 ?>
 </div>
 

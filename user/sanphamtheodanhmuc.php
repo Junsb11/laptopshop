@@ -2,26 +2,25 @@
 include "./inc/header.php";
 include "./inc/navbar.php";
 
-// Xử lý lấy danh mục từ URL
-$madm = $_GET['madm'] ?? null;
-
 // Kết nối CSDL
 include '../admin/connect.php';
 
-// Thiết lập các tham số phân trang
+// Lấy mã danh mục từ URL
+$madm = $_GET['madm'] ?? null;
+
+// Thiết lập phân trang
 $page = $_GET['page'] ?? 1;
 $results_per_page = 9;
 $page_first_result = ($page - 1) * $results_per_page;
 
-// Xử lý lấy sản phẩm từ CSDL với điều kiện phân trang
-$sql_xemsp = "SELECT * FROM san_pham WHERE TrangThai = 1 AND so_luong >=1 AND MaDM = '$madm'";
+// Bắt đầu câu truy vấn sản phẩm
+$sql_xemsp = "SELECT * FROM san_pham WHERE TrangThai = 1 AND so_luong >= 1 AND MaDM = '$madm'";
 
-// Xử lý lọc theo giá
+// Lọc theo giá
 if (isset($_GET['price_range']) && !empty($_GET['price_range'])) {
     $price_ranges = $_GET['price_range'];
     $where_clauses = [];
 
-    // Kiểm tra nếu 'all' được chọn, bỏ qua việc thêm điều kiện lọc giá
     if (!in_array('all', $price_ranges)) {
         foreach ($price_ranges as $range) {
             switch ($range) {
@@ -48,14 +47,13 @@ if (isset($_GET['price_range']) && !empty($_GET['price_range'])) {
     }
 }
 
-// Xử lý tìm kiếm theo tên sản phẩm
+// Tìm kiếm sản phẩm theo tên
 if (isset($_GET['search']) && !empty($_GET['search'])) {
     $search_term = $_GET['search'];
-    // Thêm điều kiện tìm kiếm vào câu truy vấn
     $sql_xemsp .= " AND TenSP LIKE '%$search_term%'";
 }
 
-// Xử lý sắp xếp
+// Sắp xếp sản phẩm
 if (isset($_GET['sort'])) {
     switch ($_GET['sort']) {
         case 'TenSP':
@@ -65,24 +63,23 @@ if (isset($_GET['sort'])) {
             $sql_xemsp .= ' ORDER BY DonGia';
             break;
         case 'MaSP':
-            $sql_xemsp .= ' ORDER BY MaSP DESC'; // Sắp xếp theo Mã sản phẩm mới nhất
+            $sql_xemsp .= ' ORDER BY MaSP DESC'; // Sắp xếp theo mã sản phẩm mới nhất
             break;
         default:
             break;
     }
 }
 
-// Số lượng sản phẩm
-$sql_count = "SELECT COUNT(*) AS total FROM san_pham WHERE TrangThai = 1 AND so_luong >=1 AND MaDM = '$madm'";
+// Lấy tổng số sản phẩm
+$sql_count = "SELECT COUNT(*) AS total FROM san_pham WHERE TrangThai = 1 AND so_luong >= 1 AND MaDM = '$madm'";
 $result_count = mysqli_query($conn, $sql_count);
 $row_count = mysqli_fetch_assoc($result_count);
 $total_records = $row_count['total'];
 $total_pages = ceil($total_records / $results_per_page);
 
-// Lấy dữ liệu sản phẩm với limit và offset
+// Lấy dữ liệu sản phẩm với phân trang
 $sql_xemsp .= " LIMIT $page_first_result, $results_per_page";
 $result_sp = mysqli_query($conn, $sql_xemsp);
-
 ?>
 
 <!-- Page Header -->
@@ -111,32 +108,32 @@ $result_sp = mysqli_query($conn, $sql_xemsp);
                     <input type="hidden" name="search" value="<?php echo $_GET['search'] ?? ''; ?>">
                     <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
                         <input type="checkbox" class="custom-control-input" name="price_range[]" id="price-all"
-                            value="all" <?php echo (empty($_GET['price_range']) || in_array('all', $_GET['price_range'])) ? 'checked' : ''; ?>>
+                            value="all" <?php echo (empty($_GET['price_range']) || in_array('all', $_GET['price_range'])) ? 'checked' : ''; ?> />
                         <label class="custom-control-label" for="price-all">Tất cả</label>
                     </div>
                     <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
                         <input type="checkbox" class="custom-control-input" name="price_range[]" id="price-1" value="1"
-                            <?php echo (isset($_GET['price_range']) && in_array('1', $_GET['price_range'])) ? 'checked' : ''; ?>>
+                            <?php echo (isset($_GET['price_range']) && in_array('1', $_GET['price_range'])) ? 'checked' : ''; ?> />
                         <label class="custom-control-label" for="price-1">Dưới 5.000.000 VNĐ</label>
                     </div>
                     <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
                         <input type="checkbox" class="custom-control-input" name="price_range[]" id="price-2" value="2"
-                            <?php echo (isset($_GET['price_range']) && in_array('2', $_GET['price_range'])) ? 'checked' : ''; ?>>
+                            <?php echo (isset($_GET['price_range']) && in_array('2', $_GET['price_range'])) ? 'checked' : ''; ?> />
                         <label class="custom-control-label" for="price-2">5.000.000 - 10.000.000 VNĐ</label>
                     </div>
                     <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
                         <input type="checkbox" class="custom-control-input" name="price_range[]" id="price-3" value="3"
-                            <?php echo (isset($_GET['price_range']) && in_array('3', $_GET['price_range'])) ? 'checked' : ''; ?>>
+                            <?php echo (isset($_GET['price_range']) && in_array('3', $_GET['price_range'])) ? 'checked' : ''; ?> />
                         <label class="custom-control-label" for="price-3">10.000.000 - 20.000.000 VNĐ</label>
                     </div>
                     <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
                         <input type="checkbox" class="custom-control-input" name="price_range[]" id="price-4" value="4"
-                            <?php echo (isset($_GET['price_range']) && in_array('4', $_GET['price_range'])) ? 'checked' : ''; ?>>
+                            <?php echo (isset($_GET['price_range']) && in_array('4', $_GET['price_range'])) ? 'checked' : ''; ?> />
                         <label class="custom-control-label" for="price-4">20.000.000 - 30.000.000 VNĐ</label>
                     </div>
                     <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between">
                         <input type="checkbox" class="custom-control-input" name="price_range[]" id="price-5" value="5"
-                            <?php echo (isset($_GET['price_range']) && in_array('5', $_GET['price_range'])) ? 'checked' : ''; ?>>
+                            <?php echo (isset($_GET['price_range']) && in_array('5', $_GET['price_range'])) ? 'checked' : ''; ?> />
                         <label class="custom-control-label" for="price-5">Trên 30.000.000 VNĐ</label>
                     </div>
                     <button type="submit" class="btn btn-primary mt-3">Lọc</button>
@@ -165,103 +162,68 @@ $result_sp = mysqli_query($conn, $sql_xemsp);
                             </button>
                             <div class="dropdown-menu" aria-labelledby="sortDropdown">
                                 <a class="dropdown-item"
-                                    href="<?php echo $_SERVER['PHP_SELF'] . '?madm=' . $madm . '&sort=TenSP&page=1'; ?>">Tên
-                                    sản phẩm</a>
+                                    href="<?php echo $_SERVER['PHP_SELF'] . '?madm=' . $madm . '&sort=TenSP&page=1'; ?>">Tên sản phẩm</a>
                                 <a class="dropdown-item"
-                                    href="<?php echo $_SERVER['PHP_SELF'] . '?madm=' . $madm . '&sort=DonGia&page=1'; ?>">Đơn
-                                    giá</a>
+                                    href="<?php echo $_SERVER['PHP_SELF'] . '?madm=' . $madm . '&sort=DonGia&page=1'; ?>">Giá</a>
                                 <a class="dropdown-item"
-                                    href="<?php echo $_SERVER['PHP_SELF'] . '?madm=' . $madm . '&sort=MaSP&page=1'; ?>">Mới
-                                    nhất</a>
+                                    href="<?php echo $_SERVER['PHP_SELF'] . '?madm=' . $madm . '&sort=MaSP&page=1'; ?>">Mã sản phẩm</a>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <?php while ($data2 = mysqli_fetch_array($result_sp)): ?>
-                    <div class="col-lg-4 col-md-6 col-sm-12 pb-1">
-                        <div class="card product-item border-0 mb-4">
-                            <div
-                                class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
-                                <img class="img-fluid w-100" src="<?php echo "../admin/" . $data2['HinhAnh']; ?>" alt="">
-                            </div>
-                            <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
-                                <h6 class="text-truncate mb-3"><?php echo $data2['TenSP']; ?></h6>
-                                <div class="d-flex justify-content-center">
-                                    <h6><?php echo number_format($data2['DonGia'], 0, '.', '.'); ?> vnđ</h6>
+                <?php while ($data2 = mysqli_fetch_assoc($result_sp)) { ?>
+                <div class="col-md-4 col-sm-6 mb-4">
+                    <div class="card border-0 shadow-sm mb-3">
+                    <img class="img-fluid w-100" src="<?php echo "../admin/" . $data2['HinhAnh']; ?>" alt="">
+                        <div class="card-body text-center">
+                            <h5 class="card-title"><?php echo $data2['TenSP']; ?></h5>
+                            <p class="card-text"><?php echo number_format($data2['DonGia'], 0, ',', '.') . " VNĐ"; ?></p>
+                        </div>
+                        <div class="card-footer d-flex justify-content-between bg-light border">
+                            <a href="chitietsp.php?id=<?php echo $data2['MaSP']; ?>" class="btn btn-sm text-dark p-0">
+                                <i class="fas fa-eye text-primary mr-1"></i>Xem chi tiết
+                            </a>
+                            <div class="input-group quantity mr-3" style="width: 130px;">
+                                <div class="input-group-btn">
+                                    <button class="btn btn-primary btn-minus">
+                                        <i class="fa fa-minus"></i>
+                                    </button>
+                                </div>
+                                <input type="text" class="form-control bg-secondary text-center" name="quantity" value="1" readonly>
+                                <div class="input-group-btn">
+                                    <button class="btn btn-primary btn-plus" data-so-luong="<?php echo $data2['so_luong']; ?>">
+                                        <i class="fa fa-plus"></i>
+                                    </button>
                                 </div>
                             </div>
-                            <div class="card-footer d-flex justify-content-between bg-light border">
-                        <a href="chitietsp.php?id=<?php echo $data['MaSP']; ?>" class="btn btn-sm text-dark p-0">
-                            <i class="fas fa-eye text-primary mr-1"></i>Xem chi tiết
-                        </a>
-                        <div class="input-group quantity mr-3" style="width: 130px;">
-                            <div class="input-group-btn">
-                                <button class="btn btn-primary btn-minus">
-                                    <i class="fa fa-minus"></i>
+                            <form action="cart.php" method="get" id="cartForm-<?php echo $data2['MaSP']; ?>">
+                                <input type="hidden" name="id" value="<?php echo $data2['MaSP']; ?>">
+                                <input type="hidden" name="quantity" value="1" id="quantity-<?php echo $data2['MaSP']; ?>">
+                                <button type="submit" class="btn btn-sm text-dark p-0">
+                                    <i class="fas fa-shopping-cart text-primary mr-1"></i>Thêm vào giỏ hàng
                                 </button>
-                            </div>
-                            <input type="text" class="form-control bg-secondary text-center" name="quantity" value="1" readonly>
-                            <div class="input-group-btn">
-                                <button class="btn btn-primary btn-plus" data-so-luong="<?php echo $data['so_luong']; ?>">
-                                    <i class="fa fa-plus"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <form action="cart.php" method="get" id="cartForm-<?php echo $data['MaSP']; ?>">
-                            <input type="hidden" name="id" value="<?php echo $data['MaSP']; ?>">
-                            <input type="hidden" name="quantity" value="1" id="quantity-<?php echo $data['MaSP']; ?>">
-                            <button type="submit" class="btn btn-sm text-dark p-0">
-                                <i class="fas fa-shopping-cart text-primary mr-1"></i>Thêm vào giỏ hàng
-                            </button>
-                        </form>
-                    </div>
+                            </form>
                         </div>
                     </div>
-                <?php endwhile; ?>
+                </div>
+                <?php } ?>
+            </div>
 
-                <!-- Pagination Start -->
-                <div class="col-12 pb-1">
+            <!-- Pagination -->
+            <div class="row">
+                <div class="col-12">
                     <nav aria-label="Page navigation">
-                        <ul class="pagination justify-content-center mb-3">
-                            <?php if ($page > 1): ?>
-                                <li class="page-item">
-                                    <a class="page-link"
-                                        href="<?php echo $_SERVER['PHP_SELF'] . '?madm=' . $madm . '&' . http_build_query(array_merge($_GET, ['page' => $page - 1])); ?>"
-                                        aria-label="Previous">
-                                        <span aria-hidden="true">&laquo;</span>
-                                        <span class="sr-only">Previous</span>
-                                    </a>
-                                </li>
-                            <?php endif; ?>
-
-                            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                                <li class="page-item <?php echo ($page == $i) ? 'active' : ''; ?>">
-                                    <a class="page-link"
-                                        href="<?php echo $_SERVER['PHP_SELF'] . '?madm=' . $madm . '&' . http_build_query(array_merge($_GET, ['page' => $i])); ?>"><?php echo $i; ?></a>
-                                </li>
-                            <?php endfor; ?>
-
-                            <?php if ($page < $total_pages): ?>
-                                <li class="page-item">
-                                    <a class="page-link"
-                                        href="<?php echo $_SERVER['PHP_SELF'] . '?madm=' . $madm . '&' . http_build_query(array_merge($_GET, ['page' => $page + 1])); ?>"
-                                        aria-label="Next">
-                                        <span aria-hidden="true">&raquo;</span>
-                                        <span class="sr-only">Next</span>
-                                    </a>
-                                </li>
-                            <?php endif; ?>
+                        <ul class="pagination justify-content-center">
+                            <?php for ($i = 1; $i <= $total_pages; $i++) { ?>
+                            <li class="page-item"><a class="page-link" href="?madm=<?php echo $madm; ?>&page=<?php echo $i; ?>"><?php echo $i; ?></a></li>
+                            <?php } ?>
                         </ul>
                     </nav>
                 </div>
-                <!-- Pagination End -->
-
             </div>
         </div>
-        <!-- End Product Listing -->
     </div>
 </div>
-<!-- End Product -->
 
 <?php include "./inc/footer.php"; ?>

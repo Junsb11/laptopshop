@@ -35,17 +35,22 @@
                 </li>
                 <li><a class="menuitem">Quản lý tài khoản</a>
                     <ul class="submenu">
-                        <li><a href="xemtaikhoan.php">Xem tài khoản</a></li>   
+                        <li><a href="xemtaikhoan.php">Xem tài khoản</a></li> 
+                        <li><a href="themtaikhoan.php">Thêm tài khoản</a></li>   
+  
                     </ul>
                 </li>
                 <li><a class="menuitem">Quản lý nhân viên</a>
                     <ul class="submenu">
-                        <li><a href="xemnhanvien.php">Xem nhân viên</a></li>   
+                        <li><a href="xemnhanvien.php">Xem nhân viên</a></li>  
+                        <li><a href="themnhanvien.php">Thêm nhân viên</a></li>    
                     </ul>
                 </li>
                 <li><a class="menuitem">Quản lý bảo hành</a>
                     <ul class="submenu">
-                        <li><a href="xembaohanh.php">Xem bảo hành</a></li>   
+                        <li><a href="baohanhchoxetduyet.php">Đơn chờ xét duyệt</a> </li>
+                        <li><a href="donhangdathanhtoan.php">Đơn đã đã hoàn tất</a> </li>
+                        <li><a href="donhangdahuy.php">Đơn đã hủy</a> </li>
                     </ul>
                 </li>
             </ul>

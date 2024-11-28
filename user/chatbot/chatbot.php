@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (message) {
             appendMessage('user-message', message);
             userInput.value = '';
-            fetch('.chatbot/chatbot.php', { // Thay đổi đường dẫn đến file PHP của bạn
+            fetch('.chatbot/chatbot.php', { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({ message })
@@ -336,8 +336,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function loadChatHistory() {
-        // Tải lịch sử chat nếu cần thiết
-    }
+        
+        }
 });
 </script>
 </body>

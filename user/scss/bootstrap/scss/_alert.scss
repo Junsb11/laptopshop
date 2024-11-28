@@ -1,7 +1,29 @@
-//
-// Base styles
-//
+// Variables for alert padding, border, and other styling
+$alert-padding-x: 1rem;
+$alert-padding-y: 0.75rem;
+$alert-margin-bottom: 1rem;
+$alert-border-width: 1px;
+$alert-border-radius: 0.25rem;
+$alert-link-font-weight: 500;
+$close-font-size: 1rem;
 
+$theme-colors: (
+  "primary": #007bff,
+  "secondary": #6c757d,
+  "success": #28a745,
+  "danger": #dc3545,
+  "warning": #ffc107,
+  "info": #17a2b8,
+  "light": #f8f9fa,
+  "dark": #343a40
+);
+
+// Helper function for theme colors (returns adjusted colors for each context)
+@function theme-color-level($color, $level) {
+  @return mix($color, $level);
+}
+
+// Base styles for the alert component
 .alert {
   position: relative;
   padding: $alert-padding-y $alert-padding-x;
@@ -10,26 +32,20 @@
   @include border-radius($alert-border-radius);
 }
 
-// Headings for larger alerts
+// Style for larger headings in alerts
 .alert-heading {
-  // Specified to prevent conflicts of changing $headings-color
-  color: inherit;
+  color: inherit; // Prevent conflicts from changing heading color
 }
 
-// Provide class for links that match alerts
+// Style for links inside alerts
 .alert-link {
   font-weight: $alert-link-font-weight;
 }
 
-
-// Dismissible alerts
-//
-// Expand the right padding and account for the close button's positioning.
-
+// Dismissible alerts (alerts that can be closed)
 .alert-dismissible {
   padding-right: $close-font-size + $alert-padding-x * 2;
 
-  // Adjust close link position
   .close {
     position: absolute;
     top: 0;
@@ -40,13 +56,22 @@
   }
 }
 
-
-// Alternate styles
-//
-// Generate contextual modifier classes for colorizing the alert.
-
+// Generate contextual modifier classes for alert colors
 @each $color, $value in $theme-colors {
   .alert-#{$color} {
     @include alert-variant(theme-color-level($color, $alert-bg-level), theme-color-level($color, $alert-border-level), theme-color-level($color, $alert-color-level));
   }
 }
+
+// Mixin for creating the alert styles based on color levels
+@mixin alert-variant($bg-color, $border-color, $color) {
+  background-color: $bg-color;
+  border-color: $border-color;
+  color: $color;
+}
+
+// Default color levels for alerts
+$alert-bg-level: #f0f0f0;
+$alert-border-level: #dcdcdc;
+$alert-color-level: #212529;
+

@@ -13,29 +13,23 @@ $theme-colors: (
 );
 
 $font-family-sans-serif: 'Poppins', sans-serif;
+$font-family-serif: 'Merriweather', serif;
 
 $body-color: #6F6F6F;
-
 $headings-color: $dark;
 
 $border-color: $secondary;
-
 $input-border-color: $secondary;
 
 $enable-responsive-font-sizes: true;
-
 $enable-rounded: false;
 
 $btn-focus-box-shadow: none;
-
 $btn-active-box-shadow: none;
-
 $input-btn-focus-box-shadow: none;
-
 $input-placeholder-color: #999999;
 
 @import "bootstrap/scss/bootstrap";
-
 
 /********** Custom CSS ************/
 
@@ -63,7 +57,8 @@ $input-placeholder-color: #999999;
 
 .navbar-light .navbar-nav .nav-link:hover,
 .navbar-light .navbar-nav .nav-link.active {
-    color: $primary;
+    color: $light;
+    background-color: $primary; /* Background color change on hover */
 }
 
 @media (max-width: 991.98px) {
@@ -98,6 +93,8 @@ $input-placeholder-color: #999999;
     letter-spacing: 1px;
     font-weight: bold;
     color: $dark;
+    font-family: $font-family-serif; /* Merriweather for headings */
+    font-size: 2rem;
 }
 
 .section-title span {
@@ -133,17 +130,19 @@ $input-placeholder-color: #999999;
 }
 
 .cat-item .cat-img img,
-.product-item .product-img img  {
+.product-item .product-img img {
     transition: .5s;
 }
 
 .cat-item:hover .cat-img img,
 .product-item:hover .product-img img {
-    transform: scale(1.2);
+    transform: scale(1.1);
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2); /* Adding shadow for hover effect */
 }
 
 .product-item .btn:hover {
-    color: $primary !important;
+    color: $light !important;
+    background-color: $primary; /* Nút sẽ có nền màu primary khi hover */
 }
 
 .contact-form .help-block ul {
@@ -155,18 +154,27 @@ $input-placeholder-color: #999999;
 .back-to-top {
     position: fixed;
     display: none;
-    right: 30px;
-    bottom: 30px;
+    right: 20px;
+    bottom: 20px;
+    background-color: $primary;
+    color: $light;
+    padding: 15px;
+    border-radius: 50%;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
     z-index: 11;
     -webkit-animation: action 1s infinite alternate;
     animation: action 1s infinite alternate;
+}
+
+.back-to-top:hover {
+    background-color: $dark;
+    color: $light;
 }
 
 @-webkit-keyframes action {
     0% {
         transform: translateY(0);
     }
-
     100% {
         transform: translateY(-15px);
     }
@@ -176,8 +184,11 @@ $input-placeholder-color: #999999;
     0% {
         transform: translateY(0);
     }
-
     100% {
         transform: translateY(-15px);
     }
+}
+
+html {
+    scroll-behavior: smooth;
 }

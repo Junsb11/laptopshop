@@ -161,58 +161,75 @@ $number_of_page = ceil($number_of_result / $results_per_page);
                             <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
                                 <h6 class="text-truncate mb-3"><?php echo $data2['TenSP']; ?></h6>
                                 <div class="d-flex justify-content-center">
-                                    <h6><?php echo number_format($data2['DonGia'], 0, '.', '.'); ?> vnđ</h6><h6 class="text-muted ml-2"></h6>
+                                    <h6><?php echo number_format($data2['DonGia'], 0, '.', '.'); ?> vnđ</h6>
                                 </div>
                             </div>
                             <div class="card-footer d-flex justify-content-between bg-light border">
-                                <a href="chitietsp.php?id=<?php echo $data2['MaSP']; ?>" class="btn btn-sm text-dark p-0"><i class="fas fa-eye text-primary mr-1"></i>Xem chi tiết</a>
-                                <a href="cart.php?id=<?php echo $data2['MaSP']; ?>" class="btn btn-sm text-dark p-0"><i class="fas fa-shopping-cart text-primary mr-1"></i>Thêm vào giỏ</a>
+                                <a href="chitietsp.php?id=<?php echo $data2['MaSP']; ?>" class="btn btn-sm text-dark p-0">
+                                    <i class="fas fa-eye text-primary mr-1"></i>Xem chi tiết
+                                </a>
+                                <div class="input-group quantity mr-3" style="width: 130px;">
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-primary btn-minus" type="button" onclick="decreaseQuantity(<?php echo $data2['MaSP']; ?>)">
+                                            <i class="fa fa-minus"></i>
+                                        </button>
+                                    </div>
+                                    <input type="text" class="form-control bg-secondary text-center" name="quantity" id="quantity-<?php echo $data2['MaSP']; ?>" value="1" readonly>
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-primary btn-plus" type="button" onclick="increaseQuantity(<?php echo $data2['MaSP']; ?>)">
+                                            <i class="fa fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <form action="cart.php" method="get" id="cartForm-<?php echo $data2['MaSP']; ?>">
+                                    <input type="hidden" name="id" value="<?php echo $data2['MaSP']; ?>">
+                                    <input type="hidden" name="quantity" id="hidden-quantity-<?php echo $data2['MaSP']; ?>" value="1">
+                                    <button type="submit" class="btn btn-sm text-dark p-0">
+                                        <i class="fas fa-shopping-cart text-primary mr-1"></i>Thêm vào giỏ hàng
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
                 <?php } ?>
             </div>
+
             <!-- Pagination Start -->
-            <nav aria-label="Page navigation example">
-                <ul class="pagination justify-content-center">
-                    <?php if ($page > 1) { ?>
-                        <li class="page-item">
-                            <a class="page-link" href="sanpham.php?page=<?php echo $page - 1 . "&sort=" . $sort; ?>" aria-label="Previous">
-                                <span aria-hidden="true">&laquo;</span>
-                                <span class="sr-only">Previous</span>
-                            </a>
-                        </li>
-                    <?php } else { ?>
-                        <li class="page-item disabled">
-                            <span class="page-link" aria-disabled="true">&laquo;</span>
-                        </li>
-                    <?php } ?>
-
-                    <?php for ($i = 1; $i <= $number_of_page; $i++) { ?>
-                        <li class="page-item <?php if ($page == $i) echo 'active'; ?>">
-                            <a class="page-link" href="sanpham.php?page=<?php echo $i . "&sort=" . $sort; ?>"><?php echo $i; ?></a>
-                        </li>
-                    <?php } ?>
-
-                    <?php if ($page < $number_of_page) { ?>
-                        <li class="page-item">
-                            <a class="page-link" href="sanpham.php?page=<?php echo $page + 1 . "&sort=" . $sort; ?>" aria-label="Next">
-                                <span aria-hidden="true">&raquo;</span>
-                                <span class="sr-only">Next</span>
-                            </a>
-                        </li>
-                    <?php } else { ?>
-                        <li class="page-item disabled">
-                            <span class="page-link" aria-disabled="true">&raquo;</span>
-                        </li>
-                    <?php } ?>
-                </ul>
-            </nav>
+            <div class="d-flex justify-content-center">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        <?php for ($page = 1; $page <= $number_of_page; $page++) { ?>
+                            <li class="page-item"><a class="page-link" href="sanpham.php?page=<?php echo $page; ?>"><?php echo $page; ?></a></li>
+                        <?php } ?>
+                    </ul>
+                </nav>
+            </div>
             <!-- Pagination End -->
         </div>
         <!-- Shop Product End -->
     </div>
 </div>
 <!-- Shop End -->
+
+<script>
+    // JavaScript functions for increasing and decreasing the quantity
+    function increaseQuantity(productId) {
+        let quantityInput = document.getElementById('quantity-' + productId);
+        let hiddenQuantityInput = document.getElementById('hidden-quantity-' + productId);
+        let currentQuantity = parseInt(quantityInput.value);
+        quantityInput.value = currentQuantity + 1;
+        hiddenQuantityInput.value = currentQuantity + 1;  // Update hidden input for form submission
+    }
+
+    function decreaseQuantity(productId) {
+        let quantityInput = document.getElementById('quantity-' + productId);
+        let hiddenQuantityInput = document.getElementById('hidden-quantity-' + productId);
+        let currentQuantity = parseInt(quantityInput.value);
+        if (currentQuantity > 1) {
+            quantityInput.value = currentQuantity - 1;
+            hiddenQuantityInput.value = currentQuantity - 1;  // Update hidden input for form submission
+        }
+    }
+</script>
 
 <?php include "./inc/footer.php"; ?>

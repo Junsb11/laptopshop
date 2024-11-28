@@ -45,7 +45,7 @@
                 </li>
                 <li><a class="menuitem">Quản lý bảo hành</a>
                     <ul class="submenu">
-                        <li><a href="xembaohanh.php">Xem nhân viên</a></li>   
+                        <li><a href="xembaohanh.php">Xem bảo hành</a></li>   
                     </ul>
                 </li>
             </ul>

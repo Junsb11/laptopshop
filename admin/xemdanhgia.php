@@ -10,7 +10,7 @@ include 'inc/sidebar.php'?>
 <div class="grid_10">
             <div class="box round first grid">
 				<form action="xemtaikhoan.php" method="get">
-                <h2>Danh sách tài khoản</h2>
+                <h2>Danh sách đánh giá</h2>
                 <div class="block">        
                     <table class="data display datatable" id="example">
 					<thead>

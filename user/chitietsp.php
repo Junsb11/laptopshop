@@ -1,9 +1,10 @@
-<!-- chitietsp.php -->
-<?php include "./inc/header.php"; 
+<?php 
+include "./inc/header.php"; 
 if (!isset($_SESSION)) {
-    session_start();
+    session_start(); 
 }
-include "./inc/navbar.php"; ?>
+include "./inc/navbar.php"; 
+?>
 
 <!-- Page Header Start -->
 <div class="container-fluid bg-secondary mb-5">
@@ -20,17 +21,20 @@ include "./inc/navbar.php"; ?>
 
 <?php 
 include '../admin/connect.php';
+
+// Get product ID
 $idsp = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
 if (!$idsp) {
     echo "ID sản phẩm không hợp lệ.";
     exit;
 }
-$sql_chitietsp = "SELECT *, AVG(SoSao) as Sao, COUNT(d.SoSao) as Dem FROM san_pham s LEFT JOIN danhgia d ON s.MaSP = d.MaSP WHERE s.MaSP = '$idsp'";
-$result_chitietsp = mysqli_query($conn, $sql_chitietsp);
-if (!$result_chitietsp) {
-    echo "Lỗi truy vấn cơ sở dữ liệu.";
-    exit;
-}
+
+// Query product details and average ratings
+$sql_chitietsp = "SELECT *, AVG(SoSao) as Sao, COUNT(d.SoSao) as Dem FROM san_pham s LEFT JOIN danhgia d ON s.MaSP = d.MaSP WHERE s.MaSP = ?";
+$stmt = $conn->prepare($sql_chitietsp);
+$stmt->bind_param('i', $idsp);
+$stmt->execute();
+$result_chitietsp = $stmt->get_result();
 
 if ($result_chitietsp && mysqli_num_rows($result_chitietsp) > 0) {
     while ($data = mysqli_fetch_array($result_chitietsp)) {
@@ -85,30 +89,17 @@ if ($result_chitietsp && mysqli_num_rows($result_chitietsp) > 0) {
                         </button>
                     </div>
                 </div>
-                <form id="cartForm" action="cart.php" method="get">
+                <form action="cart.php" method="get" id="cartForm" action="cart.php" method="get">
                     <input type="hidden" name="id" value="<?php echo $data['MaSP']; ?>">
-                    <button type="submit" class="btn btn-primary px-3"><i class="fa fa-shopping-cart mr-1"></i>Thêm vào giỏ hàng</button>
+                    <input type="hidden" name="quantity" value="1" id="quantity_input">
+                    <button type="submit" class="btn btn-primary px-3">
+                        <i class="fa fa-shopping-cart mr-1"></i>Thêm vào giỏ hàng
+                    </button>
                 </form>
-            </div>
-            <div class="d-flex pt-2">
-                <p class="text-dark font-weight-medium mb-0 mr-2">Share on:</p>
-                <div class="d-inline-flex">
-                    <a class="text-dark px-2" href="">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                    <a class="text-dark px-2" href="">
-                        <i class="fab fa-twitter"></i>
-                    </a>
-                    <a class="text-dark px-2" href="">
-                        <i class="fab fa-linkedin-in"></i>
-                    </a>
-                    <a class="text-dark px-2" href="">
-                        <i class="fab fa-pinterest"></i>
-                    </a>
-                </div>
             </div>
         </div>
     </div>
+
     <div class="row px-xl-5">
         <div class="col">
             <div class="nav nav-tabs justify-content-center border-secondary mb-4">
@@ -120,9 +111,14 @@ if ($result_chitietsp && mysqli_num_rows($result_chitietsp) > 0) {
                     <h4 class="mb-3">Mô tả sản phẩm</h4>
                     <p> <?php echo $data['MoTa'] ?></p>
                 </div>
-                <?php       
-                    $sql_xemdg = "SELECT * FROM danhgia WHERE MaSP = '$idsp'";
-                    $result_dg = mysqli_query($conn, $sql_xemdg);
+
+                <?php
+                // Fetch reviews
+                $sql_xemdg = "SELECT * FROM danhgia WHERE MaSP = ?";
+                $stmt_reviews = $conn->prepare($sql_xemdg);
+                $stmt_reviews->bind_param('i', $idsp);
+                $stmt_reviews->execute();
+                $result_dg = $stmt_reviews->get_result();
                 ?>
                 <div class="tab-pane fade" id="tab-pane-3">
                     <div class="row">
@@ -154,76 +150,74 @@ if ($result_chitietsp && mysqli_num_rows($result_chitietsp) > 0) {
                                 <p>Chưa có đánh giá nào cho sản phẩm này.</p>
                             <?php } ?>
                         </div>
-                        <div class="col-md-6">
-                            <form method="post" action="chitietsp.php?id=<?php echo $idsp; ?>">
-                                <h4 class="mb-4">ĐÁNH GIÁ</h4>
-                                <small>Your email address will not be published. Required fields are marked *</small>
-                                <div class="d-flex my-3">
-                                    <p class="mb-0 mr-2">Số sao * :</p>
-                                    <div class="text-primary">
-                                        <select name="txtsosao" required>
-                                            <option value="1">1 Sao</option>
-                                            <option value="2">2 Sao</option>
-                                            <option value="3">3 Sao</option>
-                                            <option value="4">4 Sao</option>
-                                            <option value="5">5 Sao</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="txtnoidung">Nội dung đánh giá *</label>
-                                    <textarea id="txtnoidung" name="txtnoidung" cols="30" rows="5" class="form-control" required></textarea>
-                                </div>
-                                <div class="form-group mb-0">
-                                    <?php if (isset($_SESSION['tendn'])) { ?>
-                                    <input type="submit" value="Gửi đánh giá" class="btn btn-primary px-3">
-                                    <?php } else { ?>
-                                    <p>Bạn cần đăng nhập để đánh giá sản phẩm. <a href="dangnhap.php">Đăng nhập</a></p>
-                                    <?php } ?>
-                                </div>
-                            </form>
-                            <?php
-                            if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-                                if (isset($_POST['txtnoidung']) && isset($_POST['txtsosao']) && isset($_SESSION['tendn'])) {
-                                    $tendn = $_SESSION['tendn'];
-                                    $noidung = mysqli_real_escape_string($conn, $_POST['txtnoidung']);
-                                    $sosao = (int) $_POST['txtsosao'];
-                                    $today = date("Y-m-d H:i:s");
-                                    $sql_them = "INSERT INTO danhgia (MaSP, TenDangNhap, SoSao, NoiDung, NgayDG, TrangThai) 
-                                                 VALUES ('$idsp', '$tendn', '$sosao', '$noidung', '$today', 1)";
-                                    $result_them = mysqli_query($conn, $sql_them);
-                                    if ($result_them) {
-                                        echo "<script>
-                                            alert('Đánh giá của bạn đã được gửi.');
-                                            window.location.href='chitietsp.php?id=$idsp&tab=3';
-                                        </script>";
-                                    } else {
-                                        echo "Lỗi: " . $sql_them . "<br>" . mysqli_error($conn);
-                                    }
-                                }
-                            }
-                            ?>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<?php }
+
+<?php
+    }
 } else {
     echo "Không tìm thấy sản phẩm.";
-} ?>
-<!-- Shop Detail End -->
-
-<?php include "./inc/footer.php"; ?>
-
+}
+?>
+<!-- JavaScript xử lý tăng giảm số lượng sản phẩm -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function() {
-    var urlParams = new URLSearchParams(window.location.search);
-    if(urlParams.has('tab')) {
-        var tabIndex = urlParams.get('tab');
-        $('.nav-tabs a[href="#tab-pane-' + tabIndex + '"]').tab('show');
+    $(document).on('click', '.btn-plus', function(e) {
+        e.preventDefault();
+        var input = $(this).closest('.input-group').find('input[name="quantity"]');
+        var quantity = parseInt(input.val());
+        var so_luong = parseInt($(this).data('so-luong'));
+
+        if (quantity < so_luong && so_luong >= 1) {
+            input.val(quantity + 1);
+            updateCartFormQuantity($(this), quantity + 1);
+        } else {
+            alert('Số lượng sản phẩm hiện có trong kho là: ' + so_luong);
+        }
+    });
+
+    $(document).on('click', '.btn-minus', function(e) {
+        e.preventDefault();
+        var input = $(this).closest('.input-group').find('input[name="quantity"]');
+        var quantity = parseInt(input.val());
+
+        if (quantity > 1) {
+            input.val(quantity - 1);
+            updateCartFormQuantity($(this), quantity - 1);
+        }
+    });
+
+    function updateCartFormQuantity(button, quantity) {
+        var form = button.closest('.card-footer').find('form');
+        form.find('input[name="quantity"]').val(quantity);
     }
+
+    // Submit form sử dụng AJAX
+    $('#cartForm-<?php echo $data['MaSP']; ?>').submit(function(e) {
+        e.preventDefault();
+        var quantity = $('#quantity-<?php echo $data['MaSP']; ?>').val();
+        var product_id = $(this).find('input[name="id"]').val();
+
+        $.ajax({
+            type: "GET",
+            url: "cart.php",
+            data: { id: product_id, quantity: quantity },
+            success: function(response) {
+                alert('Sản phẩm đã được thêm vào giỏ hàng!');
+                // Cập nhật giỏ hàng nếu cần
+            },
+            error: function() {
+                alert('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng.');
+            }
+        });
+    });
 });
 </script>
+
+<?php include "./chatbot/chatbot.php"; ?>
+<?php include "./inc/footer.php"; ?>

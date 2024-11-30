@@ -8,7 +8,7 @@
                 <p>Mọi thắc mắc xin vui lòng liên hệ:</p>
                 <p class="mb-2"><i class="fa fa-map-marker-alt text-primary mr-3"></i>01 Nguyễn Văn Linh, Đà Nẵng</p>
                 <p class="mb-2"><i class="fa fa-envelope text-primary mr-3"></i>g3shoplaptop@gmail.com</p>
-                <p class="mb-0"><i class="fa fa-phone-alt text-primary mr-3"></i>+84-35338478</p>
+                <p class="mb-0"><i class="fa fa-phone-alt text-primary mr-3"></i>+84777478157</p>
             </div>
             <div class="col-lg-8 col-md-12">    
                 <div class="row">

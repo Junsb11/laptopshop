@@ -3,24 +3,25 @@ include "./inc/header.php";
 include "./inc/navbar.php"; 
 include '../admin/connect.php';
 
-// Kiểm tra nếu session chưa được bắt đầu
+// Start the session only if it hasn't been started
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-// Lấy giá trị ID sản phẩm từ URL
-$idsp = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
+// Validate database connection
+if (!$conn) {
+    die("Unable to connect to the database.");
+}
 
-// Kiểm tra ID sản phẩm hợp lệ
+// Retrieve product ID from URL and validate
+$idsp = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
 if (!$idsp || !is_numeric($idsp) || $idsp <= 0) {
     header("Location: index.php?error=invalid_id");
     exit;
 }
 
-// Truy vấn thông tin chi tiết sản phẩm và đánh giá trung bình
-$sql_chitietsp = "SELECT *, AVG(SoSao) as Sao, COUNT(d.SoSao) as Dem FROM san_pham s 
-                  LEFT JOIN danhgia d ON s.MaSP = d.MaSP 
-                  WHERE s.MaSP = ? AND s.TrangThai = 1";
+// Fetch product details from database
+$sql_chitietsp = "SELECT * FROM san_pham WHERE MaSP = ? AND TrangThai = 1";
 $stmt = $conn->prepare($sql_chitietsp);
 $stmt->bind_param('i', $idsp);
 $stmt->execute();
@@ -28,10 +29,20 @@ $result_chitietsp = $stmt->get_result();
 
 if ($result_chitietsp && $result_chitietsp->num_rows > 0) {
     $data = $result_chitietsp->fetch_assoc();
-    $madm = $data['MaDM']; // Mã danh mục sản phẩm
+    $madm = $data['MaDM'];
+
+    // Get average star rating and total reviews count
+    $sql_danhgia_summary = "SELECT AVG(SoSao) AS Sao, COUNT(SoSao) AS Dem FROM danhgia WHERE MaSP = ?";
+    $stmt_summary = $conn->prepare($sql_danhgia_summary);
+    $stmt_summary->bind_param('i', $idsp);
+    $stmt_summary->execute();
+    $result_summary = $stmt_summary->get_result();
+    $summary = $result_summary->fetch_assoc();
+    $avg_star = $summary['Sao'] ?? 0;
+    $total_reviews = $summary['Dem'] ?? 0;
 ?>             
 
-<!-- Page Header Start -->
+<!-- Page Header Section -->
 <div class="container-fluid bg-secondary mb-5">
     <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 300px">
         <h1 class="font-weight-semi-bold text-uppercase mb-3">Chi tiết sản phẩm</h1>
@@ -42,16 +53,16 @@ if ($result_chitietsp && $result_chitietsp->num_rows > 0) {
         </div>
     </div>
 </div>
-<!-- Page Header End -->
 
-<!-- Chi tiết sản phẩm -->
+<!-- Product Details Section -->
 <div class="container-fluid py-5">
-    <div class="row px-xl-5">
-        <div class="col-lg-5 pb-5">
+    <div class="row d-flex justify-content-between">
+        <div class="col-lg-5 pb-5 d-flex justify-content-center">
+            <!-- Product Image Carousel -->
             <div id="product-carousel" class="carousel slide" data-ride="carousel">
                 <div class="carousel-inner border">
                     <div class="carousel-item active">
-                        <img class="w-100 h-100" src='<?php echo "../admin/" . $data['HinhAnh']; ?>' alt="Image">
+                        <img class="w-100 h-100" src='<?php echo "../admin/" . ($data['HinhAnh'] ?? "default_image.jpg"); ?>' alt="Product Image">
                     </div>
                 </div>
                 <a class="carousel-control-prev" href="#product-carousel" data-slide="prev">
@@ -64,22 +75,23 @@ if ($result_chitietsp && $result_chitietsp->num_rows > 0) {
         </div>
         <div class="col-lg-7 pb-5">
             <h3 class="font-weight-semi-bold"><?php echo htmlspecialchars($data['TenSP']); ?></h3>
+            <!-- Rating Stars -->
             <div class="d-flex mb-3">
                 <div class="text-primary mr-2">
                     <?php for ($i = 0; $i < 5; $i++) {
-                        if ($data['Sao'] - $i >= 1) { ?>
+                        if ($avg_star - $i >= 1) { ?>
                             <small class="fas fa-star"></small>
-                        <?php } elseif ($data['Sao'] - $i >= 0.5) { ?>
+                        <?php } elseif ($avg_star - $i >= 0.5) { ?>
                             <small class="fas fa-star-half-alt"></small>
                         <?php } else { ?>
                             <small class="far fa-star"></small>
                         <?php } 
                     } ?>
                 </div>
-                <small class="pt-1">(<?php echo $data['Dem']; ?> đánh giá)</small>
+                <small class="pt-1">(<?php echo $total_reviews; ?> đánh giá)</small>
             </div>
             <h3 class="font-weight-semi-bold mb-4"><?php echo number_format($data['DonGia'], 0, '.', '.'); ?> vnđ</h3>
-            <p class="mb-4">Mô tả: <?php echo htmlspecialchars($data['MoTa']); ?></p>
+            <p class="mb-4">Mô tả: <?php echo ($data['MoTa']); ?></p>
             <div class="d-flex align-items-center mb-4 pt-2">
                 <div class="input-group quantity mr-3" style="width: 130px;">
                     <div class="input-group-btn">
@@ -87,7 +99,7 @@ if ($result_chitietsp && $result_chitietsp->num_rows > 0) {
                             <i class="fa fa-minus"></i>
                         </button>
                     </div>
-                    <input type="text" class="form-control bg-secondary text-center" name="quantity" value="1" id="quantity-input-<?php echo $data['MaSP']; ?>">
+                    <input type="number" class="form-control bg-secondary text-center" name="quantity" value="1" id="quantity-input-<?php echo $data['MaSP']; ?>" min="1">
                     <div class="input-group-btn">
                         <button class="btn btn-primary btn-plus">
                             <i class="fa fa-plus"></i>
@@ -105,23 +117,22 @@ if ($result_chitietsp && $result_chitietsp->num_rows > 0) {
         </div>
     </div>
 
-<!-- Mô tả sản phẩm và đánh giá -->
+<!-- Product Description and Reviews Section -->
 <div class="row px-xl-5">
     <div class="col">
         <div class="nav nav-tabs justify-content-center border-secondary mb-4">
             <a class="nav-item nav-link active" data-toggle="tab" href="#tab-pane-1">Mô tả</a>
-            <a class="nav-item nav-link" data-toggle="tab" href="#tab-pane-3">Đánh giá (<?php echo $data['Dem']; ?>)</a>
+            <a class="nav-item nav-link" data-toggle="tab" href="#tab-pane-3">Đánh giá (<?php echo $total_reviews; ?>)</a>
         </div>
         <div class="tab-content">
             <div class="tab-pane fade show active" id="tab-pane-1">
                 <h4 class="mb-3">Mô tả sản phẩm</h4>
-                <p><?php echo htmlspecialchars($data['MoTa']); ?></p>
+                <p><?php echo ($data['MoTa']); ?></p>
             </div>
-
             <div class="tab-pane fade" id="tab-pane-3">
                 <div class="row">
                     <div class="col-md-6">
-                        <h4 class="mb-4"><?php echo $data['Dem']; ?> đánh giá cho <?php echo htmlspecialchars($data['TenSP']); ?></h4>
+                        <h4 class="mb-4"><?php echo $total_reviews; ?> đánh giá cho <?php echo htmlspecialchars($data['TenSP']); ?></h4>
                         <?php 
                         $sql_xemdg = "SELECT * FROM danhgia WHERE MaSP = ? LIMIT 10";
                         $stmt_reviews = $conn->prepare($sql_xemdg);
@@ -132,7 +143,7 @@ if ($result_chitietsp && $result_chitietsp->num_rows > 0) {
                         if ($result_dg && $result_dg->num_rows > 0) {
                             while ($dg = $result_dg->fetch_assoc()) { ?>
                                 <div class="media mb-4">
-                                    <img src="img/user.png" alt="Image" class="img-fluid mr-3 mt-1" style="width: 45px;">
+                                    <img src="img/user.png" alt="User Image" class="img-fluid mr-3 mt-1" style="width: 45px;">
                                     <div class="media-body">
                                         <h6><?php echo htmlspecialchars($dg['TenDangNhap']); ?><small> - <i><?php echo $dg['NgayDG']; ?></i></small></h6>
                                         <div class="text-primary mb-2">
@@ -159,32 +170,9 @@ if ($result_chitietsp && $result_chitietsp->num_rows > 0) {
         </div>
     </div>
 </div>
+</div>
 
 <?php } else { ?>
-    <div class='container text-center'><p class='text-danger'>Không tìm thấy sản phẩm.</p></div>
+    <div class="container text-center"><p class="text-danger">Không tìm thấy sản phẩm.</p></div>
 <?php } ?>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-$(document).ready(function () {
-    $(document).off('click', '.btn-plus').on('click', '.btn-plus', function (e) {
-        e.preventDefault();
-        var input = $(this).closest('.input-group').find('input[name="quantity"]');
-        var quantity = parseInt(input.val()) || 1;
-        input.val(quantity + 1);
-        $('#quantity-<?php echo $data['MaSP']; ?>').val(quantity + 1);
-    });
-
-    $(document).off('click', '.btn-minus').on('click', '.btn-minus', function (e) {
-        e.preventDefault();
-        var input = $(this).closest('.input-group').find('input[name="quantity"]');
-        var quantity = parseInt(input.val()) || 1;
-        if (quantity > 1) {
-            input.val(quantity - 1);
-            $('#quantity-<?php echo $data['MaSP']; ?>').val(quantity - 1);
-        }
-    });
-});
-</script>
-
 <?php include "./inc/footer.php"; ?>

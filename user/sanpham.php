@@ -231,5 +231,5 @@ $number_of_page = ceil($number_of_result / $results_per_page);
         }
     }
 </script>
-
+<?php include "./chatbot/chatbot.php"; ?>
 <?php include "./inc/footer.php"; ?>

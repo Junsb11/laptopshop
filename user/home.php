@@ -149,5 +149,5 @@ $(document).ready(function() {
 });
 </script>
 
-<?php include "./chatbot/chatbot.php"; ?>
+<?php include "./chatbot/chatbot-client.php"; ?>
 <?php include "./inc/footer.php"; ?>

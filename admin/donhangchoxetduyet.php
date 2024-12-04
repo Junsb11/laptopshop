@@ -29,15 +29,16 @@
                     ?>
                     <tr class="odd gradeX">
                         <td><?php echo $stt++; ?></td>
-                        <td><?php echo $data['HoTenNN']; ?></td>
-                        <td><?php echo $data['NgayHD']; ?></td>
-                        <td><?php echo $data['GhiChu']; ?></td>
-                        <td><?php echo $data['DiaChi']; ?></td>
-                        <td><?php echo $data['SDT']; ?></td>
+                        <td><?php echo htmlspecialchars($data['HoTenNN']); ?></td>
+                        <td><?php echo htmlspecialchars($data['NgayHD']); ?></td>
+                        <td><?php echo htmlspecialchars($data['GhiChu']); ?></td>
+                        <td><?php echo htmlspecialchars($data['DiaChi']); ?></td>
+                        <td><?php echo htmlspecialchars($data['SDT']); ?></td>
                         <td>Chờ xét duyệt</td>
                         <td>
-                            <button class="btn btn-primary btn-sm" onclick="openModal(<?php echo $data['MaHD']; ?>)">Duyệt đơn</button> || 
-                            <button class="btn btn-danger btn-sm" onclick="openModal(<?php echo $data['MaHD']; ?>)">Hủy đơn</button>
+                            <button class="btn btn-primary btn-sm" onclick="openModal(<?php echo $data['MaHD']; ?>, 'duyet')">Duyệt đơn</button>
+                            ||
+                            <button class="btn btn-danger btn-sm" onclick="openModal(<?php echo $data['MaHD']; ?>, 'huy')">Hủy đơn</button>
                         </td>
                     </tr>
                     <?php } ?>
@@ -52,33 +53,22 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="myModalLabel">Chi tiết đơn hàng</h5>
+                <h5 class="modal-title" id="myModalLabel">Xác nhận thao tác</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="">
+                <form method="POST" action="process_order.php">
                     <input type="hidden" name="MaHD" id="MaHD">
-                    <div class="form-group">
-                        <label for="customerName">Khách hàng:</label>
-                        <input type="text" class="form-control" id="HoTenNN" disabled />
-                    </div>
-                    <div class="form-group">
-                        <label for="orderDate">Ngày lập đơn:</label>
-                        <input type="text" class="form-control" id="NgayHD" disabled />
-                    </div>
+                    <input type="hidden" name="action" id="action">
                     <div class="form-group">
                         <label for="ma_nv">Mã số nhân viên:</label>
                         <input type="text" name="ma_nv" class="form-control" required />
                     </div>
-                    <div class="form-group">
-                        <label for="note">Ghi chú:</label>
-                        <textarea class="form-control" id="GhiChu" disabled></textarea>
-                    </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Duyệt đơn</button>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">Xác nhận</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
                     </div>
                 </form>
             </div>
@@ -89,24 +79,13 @@
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Hàm mở modal và nạp thông tin vào form
-    function openModal(id) {
-        // Gọi ajax để lấy thông tin đơn hàng theo MaHD
-        $.ajax({
-            url: 'get_order_details.php', // Tạo một file PHP lấy chi tiết đơn hàng
-            method: 'GET',
-            data: { MaHD: id },
-            success: function(response) {
-                var orderData = JSON.parse(response);
-                // Nạp thông tin vào modal
-                $('#HoTenNN').val(orderData.HoTenNN);
-                $('#NgayHD').val(orderData.NgayHD);
-                $('#GhiChu').val(orderData.GhiChu);
-                $('#MaHD').val(orderData.MaHD);
-                // Mở modal
-                $('#myModal').modal('show');
-            }
-        });
+    // Hàm mở modal và chuẩn bị dữ liệu
+    function openModal(id, action) {
+        $('#MaHD').val(id);
+        $('#action').val(action);
+        let title = action === 'duyet' ? 'Xác nhận duyệt đơn hàng' : 'Xác nhận hủy đơn hàng';
+        $('#myModalLabel').text(title);
+        $('#myModal').modal('show');
     }
 </script>
 

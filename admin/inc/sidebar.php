@@ -48,9 +48,9 @@
                 </li>
                 <li><a class="menuitem">Quản lý bảo hành</a>
                     <ul class="submenu">
-                        <li><a href="baohanhchoxetduyet.php">Đơn chờ xét duyệt</a> </li>
-                        <li><a href="donhangdathanhtoan.php">Đơn đã đã hoàn tất</a> </li>
-                        <li><a href="donhangdahuy.php">Đơn đã hủy</a> </li>
+                        <li><a href="baohanhchoxuly.php">Đơn chờ xử lý</a> </li>
+                        <li><a href="baohanhdahoanthanh.php">Đơn đã hoàn tất</a> </li>
+                        <li><a href="baohanhdahuy.php">Đơn đã hủy</a> </li>
                     </ul>
                 </li>
             </ul>

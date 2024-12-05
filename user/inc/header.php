@@ -1,7 +1,8 @@
-<?php if (!isset($_SESSION))
-{
+<?php 
+if (!isset($_SESSION)) {
     session_start();
-} ?>
+} 
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -32,24 +33,28 @@
 <body>
     <!-- Topbar Start -->
     <div class="container-fluid">
-        
         <div class="row align-items-center py-3 px-xl-5">
+            <!-- Logo -->
             <div class="col-lg-3 d-none d-lg-block">
-                <a href="home.php" class="text-decoration-none" >
+                <a href="home.php" class="text-decoration-none">
                     <h1 class="m-0 display-5 font-weight-semi-bold" style="color:#FF3333">G3 LAPTOP</h1>
                 </a>
             </div>
-            <div class="col-lg-6 col-6 text-left">
-                <form action="timkiemsanpham.php" method="get">
-                    <div class="input-group">
-                        <input type="text" name="txtsearch" class="form-control" placeholder="Tìm Kiếm Sản Phẩm">
-                        <div class="input-group-append">
-                           
-                               <button style="width:40px" name="btnsearch"> <i class="fa fa-search"></i></button>                          
-                        </div>
-                    </div>
-                </form>
+            
+            <!-- Search Form -->
+            <div class="col-lg-6 col-12 text-left">
+    <form action="timkiemsanpham.php" method="get" class="form-inline w-100">
+        <div class="input-group w-100">
+            <input type="text" id="txtsearch" name="txtsearch" class="form-control" placeholder="Tìm Kiếm Sản Phẩm" required aria-label="Tìm kiếm sản phẩm">
+            <div class="input-group-append">
+                <button type="submit" name="btnsearch" class="btn btn-primary" style="border-radius: 0 5px 5px 0;">
+                    <i class="fa fa-search"></i> Tìm
+                </button>
             </div>
+        </div>
+    </form>
+</div>
+            <!-- Cart & Warranty -->
             <div class="col-lg-3 col-6 text-right">
                 <a href="yeucaubaohanh.php" class="btn border">
                     <i class="fas fa-tools text-primary"></i>
@@ -57,9 +62,11 @@
                 </a>
                 <a href="listcart.php" class="btn border">
                     <i class="fas fa-shopping-cart text-primary"></i>
-                    <span class="badge"><?php if(isset($_SESSION['cart'])) echo count($_SESSION['cart']);else echo '0'; ?></span>
+                    <span class="badge"><?php if(isset($_SESSION['cart'])) echo count($_SESSION['cart']); else echo '0'; ?></span>
                 </a>
             </div>
         </div>
     </div>
     <!-- Topbar End -->
+</body>
+</html>

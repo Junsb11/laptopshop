@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (message) {
             appendMessage('user-message', message);
             userInput.value = '';
-            fetch('chatbot-server.php', { // Gọi server-side chatbot
+            fetch('../admin/chatbot/chatbot-server.php', { // Gọi server-side chatbot
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({ message })

@@ -15,15 +15,14 @@ if (!isset($_SESSION['tendn'])) {
 // Lấy tên đăng nhập từ session
 $tendn = $_SESSION['tendn'];
 
-// Lấy mã bảo hành từ GET parameter
-$mahd = $_GET['mahd'];
-
-// Truy vấn chi tiết bảo hành cho đơn hàng
-$sql_baohanh = "SELECT s.TenSP, s.HinhAnh, b.ThoiGianBH, b.TrangThaiBH, b.NgayTao
-                FROM san_pham s
-                JOIN bao_hanh b ON s.MaSP = b.MaSP
-                WHERE b.MaHD = '$mahd' AND b.TenDangNhap = '$tendn'";
-$result_baohanh = mysqli_query($conn, $sql_baohanh);
+// Truy vấn lịch sử bảo hành của tất cả các sản phẩm của người dùng
+$sql_lishsu_baohanh = "SELECT s.TenSP, s.HinhAnh, b.MaBH, b.LoaiBH, b.NoiDung, b.NgayBH, b.NgayKetThuc, bhct.SoLuong, bhct.TrangThai
+                       FROM bao_hanh b
+                       JOIN chi_tiet_bao_hanh bhct ON b.MaBH = bhct.MaBH
+                       JOIN san_pham s ON bhct.MaSP = s.MaSP
+                       JOIN hoa_don h ON h.MaHD = bhct.MaHD
+                       WHERE h.TenDangNhap = '$tendn'"; 
+$result_baohanh = mysqli_query($conn, $sql_lishsu_baohanh);
 
 // Truy vấn để đếm số lượng đơn hàng theo trạng thái
 $count_choxacnhan = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM hoa_don WHERE TrangThai = 0 AND TenDangNhap = '$tendn'"));
@@ -76,39 +75,41 @@ $count_dahuy = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM hoa_don WHERE 
                 </div>
             </div>
         </div>
-
         <div class="col-md-9 content">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title">Chi tiết bảo hành - Hóa đơn: <?php echo $mahd ?></h4>
+                    <h4 class="card-title">Lịch sử bảo hành</h4>
                     <div class="table-responsive">
                         <table class="table table-bordered">
                             <thead class="thead-light">
                                 <tr>
                                     <th>STT</th>
                                     <th>Sản Phẩm</th>
-                                    <th>Thời gian bảo hành</th>
-                                    <th>Trạng thái bảo hành</th>
-                                    <th>Ngày tạo bảo hành</th>
+                                    <th>Loại bảo hành</th>
+                                    <th>Nội dung bảo hành</th>
+                                    <th>Ngày bắt đầu</th>
+                                    <th>Ngày kết thúc</th>
+                                    <th>Trạng thái</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
                                 $stt = 1;
                                 while ($data = mysqli_fetch_array($result_baohanh)) {
-                                    $status = $data['TrangThaiBH'] == 1 ? 'Đang bảo hành' : 'Hết bảo hành';
                                 ?>
                                     <tr>
                                         <td><?php echo $stt++; ?></td>
                                         <td><?php echo $data['TenSP']; ?> <img src='<?php echo "../admin/".$data['HinhAnh'] ?>' alt="" style="width: 50px;"></td>
-                                        <td><?php echo $data['ThoiGianBH']; ?> tháng</td>
-                                        <td><?php echo $status; ?></td>
-                                        <td><?php echo date('d/m/Y', strtotime($data['NgayTao'])); ?></td>
+                                        <td><?php echo $data['LoaiBH']; ?></td>
+                                        <td><?php echo $data['NoiDung']; ?></td>
+                                        <td><?php echo date('d/m/Y', strtotime($data['NgayBH'])); ?></td>
+                                        <td><?php echo date('d/m/Y', strtotime($data['NgayKetThuc'])); ?></td>
+                                        <td><?php echo ($data['TrangThai'] == 1) ? 'Còn hiệu lực' : 'Hết hạn'; ?></td>
                                     </tr>
                                 <?php } ?>
                                 <?php if (mysqli_num_rows($result_baohanh) == 0) { ?>
                                     <tr>
-                                        <td colspan="5" class="text-center">Không có bảo hành cho đơn hàng này.</td>
+                                        <td colspan="7" class="text-center">Không có lịch sử bảo hành nào.</td>    
                                     </tr>
                                 <?php } ?>
                             </tbody>

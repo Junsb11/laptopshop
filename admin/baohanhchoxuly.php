@@ -2,7 +2,7 @@
 <?php include 'inc/sidebar.php'; ?>
 <?php
     include 'connect.php';
-    $sql_xembaohanh = "SELECT * FROM bao_hanh WHERE TrangThai = 0 ORDER BY NgayYeuCau ASC";
+    $sql_xembaohanh = "SELECT * FROM bao_hanh WHERE TrangThai = 0 ORDER BY NgayBH ASC";
     $result_baohanh = mysqli_query($conn, $sql_xembaohanh);
 ?>
 <div class="grid_10">

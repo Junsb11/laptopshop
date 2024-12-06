@@ -36,7 +36,7 @@
                     <td><?php echo $data['DiaChi'];?></td>
                     <td><?php echo $data['SDT'];?></td>
 					<td>Đã thanh toán</td>
-					<td><a href="duyetdon.php?id=<?php echo $data['MaHD'] ?>">Về lại đang giao</a> </td>
+					<td>Thành công <!--<a href="duyetdon.php?id=<?php echo $data['MaHD'] ?>">Về lại đang giao</a> </td>
 				</tr>
                 <?php
 				}

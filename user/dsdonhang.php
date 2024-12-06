@@ -199,8 +199,8 @@ $count_dahuy = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM hoa_don WHERE 
                                             <a href="chitietdonhang.php?mahd=<?php echo $data['MaHD']; ?>" class="btn btn-primary btn-sm">Chi tiết</a>
                                         </td>
                                     </tr>
-                                <?php
-                                }
+                                <?php }
+                                
                                 ?>
                                 <?php if (mysqli_num_rows($result_hd) == 0) { ?>
                                     <tr>

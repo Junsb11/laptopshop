@@ -101,7 +101,7 @@ $result_orders = mysqli_query($conn, $sql_orders);
                 </div>
             </div>
 
-            <!-- Chi tiết hoá đơn đã thanh toán -->
+            <!-- Chi tiết đơn hàng -->
             <div class="col-lg-4">
                 <div class="card border-secondary mb-5">
                     <div class="card-header bg-secondary border-0">
@@ -113,7 +113,7 @@ $result_orders = mysqli_query($conn, $sql_orders);
                             echo "<ul>";
                             mysqli_data_seek($result_orders, 0); // Reset pointer
                             while ($order = mysqli_fetch_array($result_orders)) {
-                                echo "<li>Đơn hàng: {$order['MaHD']} - Ngày đặt: {$order['NgayHD']}</li>";
+                                echo "<li>Đơn hàng: {$order['MaDH']} - Ngày đặt: {$order['NgayDat']}</li>";
                             }
                             echo "</ul>";
                         } else {

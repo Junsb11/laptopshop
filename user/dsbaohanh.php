@@ -9,60 +9,47 @@ if (!isset($_SESSION)) {
 // Kiểm tra xem người dùng đã đăng nhập chưa, nếu chưa thì chuyển hướng về trang đăng nhập
 if (!isset($_SESSION['tendn'])) {
     header("Location: dangnhap.php");
-    exit();
+    exit(); // Thoát khỏi script sau khi chuyển hướng
 }
 
 // Lấy tên đăng nhập từ session
 $tendn = $_SESSION['tendn'];
 
-// Lấy tham số "loai" từ URL để lọc danh sách đơn hàng
-$loai = isset($_GET['loai']) ? $_GET['loai'] : 'choxacnhan';
+// Xử lý biến loại để lấy danh sách bảo hành tương ứng
+$loai = isset($_GET['loai']) ? $_GET['loai'] : 'choxuly';
 
 switch ($loai) {
-    case 'choxacnhan':
+    case 'choxuly':
         $l = 0;
-        $title = "Đơn hàng chờ xác nhận";
+        $title = "Yêu cầu bảo hành chờ xử lý";
         break;
-    case 'danggiao':
+    case 'dangxuly':
         $l = 1;
-        $title = "Đơn hàng đang giao";
+        $title = "Yêu cầu bảo hành đang xử lý";
         break;
-    case 'dagiao':
+    case 'dahoanthanh':
         $l = 2;
-        $title = "Đơn hàng đã giao";
+        $title = "Yêu cầu bảo hành đã hoàn thành";
         break;
     case 'dahuy':
         $l = 3;
-        $title = "Đơn hàng đã hủy";
+        $title = "Yêu cầu bảo hành đã hủy";
         break;
     default:
         $l = 0;
-        $title = "Đơn hàng chờ xác nhận";
+        $title = "Yêu cầu bảo hành chờ xử lý";
         break;
 }
 
-// Xử lý hành động xác nhận đơn hàng
-if (isset($_GET['action']) && $_GET['action'] === 'xacnhan' && isset($_GET['mahd'])) {
-    $mahd = $_GET['mahd'];
-    $sql_update = "UPDATE hoa_don SET TrangThai=2 WHERE MaHD='$mahd' AND TenDangNhap='$tendn'";
-    if (mysqli_query($conn, $sql_update)) {
-        echo "<script>alert('Xác nhận đơn hàng thành công!');</script>";
-        header("Location: dsdonhang.php?loai=dagiao");
-        exit();
-    } else {
-        echo "<script>alert('Lỗi khi xác nhận đơn hàng!');</script>";
-    }
-}
+// Truy vấn CSDL để lấy danh sách yêu cầu bảo hành từ bảng `bao_hanh`
+$sql_xembh = "SELECT * FROM bao_hanh WHERE TrangThai='$l' AND TenDangNhap='$tendn'";
+$result_bh = mysqli_query($conn, $sql_xembh);
 
-// Truy vấn CSDL để lấy danh sách đơn hàng theo trạng thái
-$sql_xemdonhang = "SELECT * FROM hoa_don WHERE TrangThai='$l' AND TenDangNhap='$tendn'";
-$result_dh = mysqli_query($conn, $sql_xemdonhang);
-
-// Đếm số lượng đơn hàng theo trạng thái
-$count_choxacnhan = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM hoa_don WHERE TrangThai=0 AND TenDangNhap='$tendn'"));
-$count_danggiao = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM hoa_don WHERE TrangThai=1 AND TenDangNhap='$tendn'"));
-$count_dagiao = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM hoa_don WHERE TrangThai=2 AND TenDangNhap='$tendn'"));
-$count_dahuy = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM hoa_don WHERE TrangThai=3 AND TenDangNhap='$tendn'"));
+// Truy vấn để đếm số lượng yêu cầu bảo hành theo trạng thái
+$count_choxuly = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM bao_hanh WHERE TrangThai=0 AND TenDangNhap='$tendn'"));
+$count_dangxuly = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM bao_hanh WHERE TrangThai=1 AND TenDangNhap='$tendn'"));
+$count_dahoanthanh = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM bao_hanh WHERE TrangThai=2 AND TenDangNhap='$tendn'"));
+$count_dahuy = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM bao_hanh WHERE TrangThai=3 AND TenDangNhap='$tendn'"));
 ?>
 
 <?php include "./inc/header.php"; ?>
@@ -74,40 +61,66 @@ $count_dahuy = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM hoa_don WHERE 
         top: 200px;
         width: 350px;
     }
+
     .content {
         margin-left: 350px;
         margin-bottom: 180px;
+    }
+
+    .btn-xacnhan {
+        background-color: #28a745;
+        color: white;
+        border-radius: 5px;
+        padding: 5px 10px;
+        font-size: 12px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+    .btn-xacnhan:hover {
+        background-color: #218838;
+        transform: scale(1.05);
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-xacnhan:active {
+        background-color: #1e7e34;
+        transform: scale(1);
+    }
+
+    .btn-xacnhan i {
+        margin-right: 5px;
     }
 </style>
 
 <div class="container mt-5">
     <div class="row">
-        <div class="col-md-3 fixed-sidebar">
+        <div class="col-lg- fixed-sidebar">
             <div class="card">
                 <div class="card-body">
-                    <h4 class="card-title">Trạng thái đơn hàng</h4>
+                    <h4 class="card-title">Tình trạng bảo hành</h4>
                     <ul class="list-group">
-                        <li class="list-group-item d-flex justify-content-between align-items-center <?php echo ($loai == 'choxacnhan') ? 'active' : ''; ?>">
-                            <a href="dsdonhang.php?loai=choxacnhan">Chờ xác nhận</a>
-                            <span class="badge badge-primary badge-pill"><?php echo $count_choxacnhan; ?></span>
+                        <li class="list-group-item d-flex justify-content-between align-items-center <?php echo ($loai == 'choxuly') ? 'active' : ''; ?>">
+                            <a href="dsbaohanh.php?loai=choxuly">Yêu cầu bảo hành chờ xử lý</a>
+                            <span class="badge badge-primary badge-pill"><?php echo $count_choxuly; ?></span>
                         </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center <?php echo ($loai == 'danggiao') ? 'active' : ''; ?>">
-                            <a href="dsdonhang.php?loai=danggiao">Đang giao</a>
-                            <span class="badge badge-primary badge-pill"><?php echo $count_danggiao; ?></span>
+                        <li class="list-group-item d-flex justify-content-between align-items-center <?php echo ($loai == 'dangxuly') ? 'active' : ''; ?>">
+                            <a href="dsbaohanh.php?loai=dangxuly">Yêu cầu bảo hành đang xử lý</a>
+                            <span class="badge badge-primary badge-pill"><?php echo $count_dangxuly; ?></span>
                         </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center <?php echo ($loai == 'dagiao') ? 'active' : ''; ?>">
-                            <a href="dsdonhang.php?loai=dagiao">Đã giao</a>
-                            <span class="badge badge-primary badge-pill"><?php echo $count_dagiao; ?></span>
+                        <li class="list-group-item d-flex justify-content-between align-items-center <?php echo ($loai == 'dahoanthanh') ? 'active' : ''; ?>">
+                            <a href="dsbaohanh.php?loai=dahoanthanh">Yêu cầu bảo hành đã hoàn thành</a>
+                            <span class="badge badge-primary badge-pill"><?php echo $count_dahoanthanh; ?></span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center <?php echo ($loai == 'dahuy') ? 'active' : ''; ?>">
-                            <a href="dsdonhang.php?loai=dahuy">Đã hủy</a>
+                            <a href="dsbaohanh.php?loai=dahuy">Yêu cầu bảo hành đã hủy</a>
                             <span class="badge badge-primary badge-pill"><?php echo $count_dahuy; ?></span>
                         </li>
                     </ul>
                 </div>
             </div>
         </div>
-        <div class="col-md-9 content">
+        <div class="col-lg-9 content">
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title"><?php echo $title; ?></h4>
@@ -116,47 +129,65 @@ $count_dahuy = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM hoa_don WHERE 
                             <thead class="thead-light">
                                 <tr>
                                     <th>STT</th>
-                                    <th>Mã đơn hàng</th>
-                                    <th>Ngày lập</th>
-                                    <th>Tổng tiền</th>
-                                    <th>Trạng thái</th>
+                                    <th>Mã bảo hành</th>
+                                    <th>Sản phẩm</th>
+                                    <th>Loại bảo hành</th>
+                                    <th>SĐT</th>
+                                    <th>Nội dung</th>
+                                    <th>Ngày bảo hành</th>
+                                    <th>Ngày kết thúc</th>
+                                    <th>Tình trạng</th>
                                     <th>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
                                 $stt = 1;
-                                while ($data = mysqli_fetch_array($result_dh)) {
+                                while ($data = mysqli_fetch_array($result_bh)) {
                                 ?>
                                     <tr>
                                         <td><?php echo $stt++; ?></td>
-                                        <td>HD<?php echo $data['MaHD']; ?></td>
-                                        <td><?php echo $data['NgayLap']; ?></td>
-                                        <td><?php echo number_format($data['TongTien'], 0, ',', '.'); ?> đ</td>
+                                        <td>BH<?php echo $data['MaBH']; ?></td>
+                                        <td><?php echo $data['MaSP']; ?></td>
+                                        <td><?php echo $data['LoaiBH']; ?></td>
+                                        <td><?php echo $data['SDT']; ?></td>
+                                        <td><?php echo $data['NoiDung']; ?></td>
+                                        <td><?php echo $data['NgayBH']; ?></td>
+                                        <td><?php echo $data['NgayKetThuc']; ?></td>
                                         <td>
                                             <?php
                                             switch ($data['TrangThai']) {
-                                                case 0: echo "Chờ xác nhận"; break;
-                                                case 1: echo "Đang giao"; break;
-                                                case 2: echo "Đã giao"; break;
-                                                case 3: echo "Đã hủy"; break;
-                                                default: echo "Không xác định"; break;
+                                                case 0:
+                                                    echo "Chờ xử lý";
+                                                    break;
+                                                case 1:
+                                                    echo "Đang xử lý";
+                                                    break;
+                                                case 2:
+                                                    echo "Đã hoàn thành";
+                                                    break;
+                                                case 3:
+                                                    echo "Đã hủy";
+                                                    break;
+                                                default:
+                                                    echo "Không xác định";
+                                                    break;
                                             }
                                             ?>
                                         </td>
                                         <td>
-                                            <?php if ($data['TrangThai'] == 1) { ?>
-                                                <a href="dsdonhang.php?action=xacnhan&mahd=<?php echo $data['MaHD']; ?>" class="btn btn-success btn-sm">Xác nhận đã nhận</a>
+                                            <?php if ($data['TrangThai'] == 0) { ?>
+                                                <a href="xacnhandangxuly.php?mabh=<?php echo $data['MaBH']; ?>" class="btn btn-xacnhan">
+                                                    <i class="fas fa-check-circle"></i> Xác nhận xử lý
+                                                </a>
                                             <?php } ?>
-                                            <a href="chitietdonhang.php?mahd=<?php echo $data['MaHD']; ?>" class="btn btn-primary btn-sm">Chi tiết</a>
+                                            <a href="chitietbaohanh.php?mabh=<?php echo $data['MaBH']; ?>" class="btn btn-primary btn-sm">Chi tiết</a>
                                         </td>
                                     </tr>
-                                <?php
-                                }
-                                ?>
-                                <?php if (mysqli_num_rows($result_dh) == 0) { ?>
+                                <?php } ?>
+                                <?php if (mysqli_num_rows($result_bh) == 0) { ?>
                                     <tr>
-                                        <td colspan="6" class="text-center">Không có đơn hàng nào.</td>
+                                        <td colspan="10" class="text-center">Không có yêu cầu bảo hành nào.</td>
                                     </tr>
                                 <?php } ?>
                             </tbody>

@@ -197,13 +197,6 @@ $count_dahuy = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM hoa_don WHERE 
                                                 </a>
                                             <?php } ?>
                                             <a href="chitietdonhang.php?mahd=<?php echo $data['MaHD']; ?>" class="btn btn-primary btn-sm">Chi tiết</a>
-
-                                            <!-- Nút Hủy -->
-                                            <?php if ($data['TrangThai'] == 0 || $data['TrangThai'] == 1) { ?>
-                                                <a href="huydonhang.php?mahd=<?php echo $data['MaHD']; ?>" class="btn btn-danger btn-sm">
-                                                    <i class="fas fa-times-circle"></i> Hủy
-                                                </a>
-                                            <?php } ?>
                                         </td>
                                     </tr>
                                 <?php

@@ -4,17 +4,19 @@
 include 'connect.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $hoTen = $_POST['HoTen'];
-    $ngaySinh = $_POST['NgaySinh'];
-    $diaChi = $_POST['DiaChi'];
-    $ngayVaoLam = $_POST['NgayVaoLam'];
-    $luongCB = $_POST['LuongCB'];
-    $vaiTro = $_POST['VaiTro'];
-    $sdt = $_POST['SDT'];
-    $email = $_POST['Email'];
-    $trangThai = $_POST['TrangThai'];
-    $ghiChu = $_POST['GhiChu'];
+    // Sanitize inputs to prevent SQL injection
+    $hoTen = mysqli_real_escape_string($conn, $_POST['HoTen']);
+    $ngaySinh = mysqli_real_escape_string($conn, $_POST['NgaySinh']);
+    $diaChi = mysqli_real_escape_string($conn, $_POST['DiaChi']);
+    $ngayVaoLam = mysqli_real_escape_string($conn, $_POST['NgayVaoLam']);
+    $luongCB = mysqli_real_escape_string($conn, $_POST['LuongCB']);
+    $vaiTro = mysqli_real_escape_string($conn, $_POST['VaiTro']);
+    $sdt = mysqli_real_escape_string($conn, $_POST['SDT']);
+    $email = mysqli_real_escape_string($conn, $_POST['Email']);
+    $trangThai = mysqli_real_escape_string($conn, $_POST['TrangThai']);
+    $ghiChu = mysqli_real_escape_string($conn, $_POST['GhiChu']);
 
+    // Insert new employee into database
     $sql_themnv = "INSERT INTO nhan_vien (HoTen, NgaySinh, DiaChi, NgayVaoLam, LuongCB, VaiTro, SDT, Email, TrangThai, GhiChu) 
                    VALUES ('$hoTen', '$ngaySinh', '$diaChi', '$ngayVaoLam', '$luongCB', '$vaiTro', '$sdt', '$email', '$trangThai', '$ghiChu')";
 

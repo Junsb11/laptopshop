@@ -1,6 +1,7 @@
 <?php
 include "../admin/connect.php";
-
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 // Bắt đầu session nếu chưa tồn tại
 if (!isset($_SESSION)) {
     session_start();

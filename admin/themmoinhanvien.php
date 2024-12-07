@@ -69,8 +69,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <td>Trạng thái</td>
                         <td>
                             <select name="TrangThai" required>
-                                <option value="1">Hoạt động</option>
-                                <option value="0">Ngừng hoạt động</option>
+                                <option value="1">Đang làm</option>
+                                <option value="0">Đã nghỉ</option>
                             </select>
                         </td>
                     </tr>

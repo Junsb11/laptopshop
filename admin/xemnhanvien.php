@@ -15,7 +15,7 @@
 
 <div class="grid_10">
     <div class="box round first grid">
-        <h2>Danh sách nhân viênt</h2>
+        <h2>Danh sách nhân viên</h2>
         <div class="block">  
             <table class="data display datatable" id="example">
                 <thead>

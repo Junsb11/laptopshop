@@ -18,7 +18,7 @@ $result_dn = mysqli_query($conn, $sql_dn);
 $data = mysqli_fetch_array($result_dn);
 
 // Lấy danh sách đơn hàng của khách hàng
-$sql_orders = "SELECT * FROM hoa_don WHERE TenDangNhap = '{$data['TenDangNhap']}' AND TrangThai = 1";
+$sql_orders = "SELECT * FROM hoa_don WHERE TenDangNhap = '{$data['TenDangNhap']}' AND TrangThai = 3";
 $result_orders = mysqli_query($conn, $sql_orders);
 ?>
 

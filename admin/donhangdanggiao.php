@@ -67,6 +67,7 @@
                         <th>Địa chỉ</th>
                         <th>SĐT</th>
                         <th>Trạng thái</th>
+                        <th>Thao Tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -81,6 +82,7 @@
                             <td><?php echo $data['DiaChi']; ?></td>
                             <td><?php echo $data['SDT']; ?></td>
                             <td>Đã giao</td>
+                            <td><a href="dathanhtoan.php?id=<?php echo $data['MaHD']; ?>">Đã thanh toán</a></td>
                         </tr>
                     <?php } ?>
                 </tbody>

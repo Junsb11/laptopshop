@@ -1,10 +1,10 @@
 1. Cấu hình Git
-git config --global user.name "Your Name"
-Đặt tên người dùng.
-git config --global user.email "your_email@example.com"
-Đặt email người dùng.
-git config --global core.editor "code --wait"
-Đặt trình soạn thảo mặc định (ở đây là VS Code).
+
+git config --global user.name "Your Name"  Đặt tên người dùng.
+
+git config --global user.email "your_email@example.com"  Đặt email người dùng.
+
+git config --global core.editor "code --wait"  Đặt trình soạn thảo mặc định (ở đây là VS Code).
 2. Khởi tạo Repository
 git init
 Khởi tạo một repository Git trong thư mục hiện tại.

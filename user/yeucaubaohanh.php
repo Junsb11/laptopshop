@@ -24,12 +24,10 @@ $data = $result_dn->fetch_assoc();
 $stmt_dn->close();
 
 // Lấy danh sách đơn hàng và sản phẩm liên quan
-$sql_orders = "SELECT hd.MaHD, hd.NgayHD, ctdh.MaSP, sp.TenSP
-FROM `hoa_don` hd
-JOIN `chi_tiet_hoa_don` ctdh ON hd.MaHD = ctdh.MaHD
-JOIN `san_pham` sp ON ctdh.MaSP = sp.MaSP
-WHERE hd.TenDangNhap = ? AND hd.TrangThai = 2
-ORDER BY hd.NgayHD DESC;";
+$sql_orders = "SELECT MaHD, MaSP, TenSP 
+FROM `hoa_don`, `san_pham`, `chi_tiet_hoa_don`
+WHERE hoa_don.MaHD = chi_tiet_hoa_don.MaHD AND chi_tiet_hoa_don.MaSP = san_pham.MaSP AND
+TenDangNhap = ? AND TrangThai = 2 AND ORDER BY NgayHD DESC";
 $stmt_orders = $conn->prepare($sql_orders);
 $stmt_orders->bind_param("s", $tendn);
 $stmt_orders->execute();
@@ -60,22 +58,22 @@ $result_orders = $stmt_orders->get_result();
                         <div class="col-md-6 form-group">
                             <label>Họ và Tên</label>
                             <input class="form-control" name="txthoten" type="text" 
-                                   value='<?php echo htmlspecialchars($data['HoTen'] ?? ""); ?>' readonly>
+                                value='<?php echo htmlspecialchars($data['HoTen'] ?? ""); ?>' readonly>
                         </div>
                         <div class="col-md-6 form-group">
                             <label>Số điện thoại</label>
                             <input class="form-control" name="txtsdt" type="text" 
-                                   value='<?php echo htmlspecialchars($data['SDT'] ?? ""); ?>' readonly>
+                                value='<?php echo htmlspecialchars($data['SDT'] ?? ""); ?>' readonly>
                         </div>
                         <div class="col-md-6 form-group">
                             <label>E-mail</label>
                             <input class="form-control" name="txtemail" type="text" 
-                                   value='<?php echo htmlspecialchars($data['Email'] ?? ""); ?>' readonly>
+                                value='<?php echo htmlspecialchars($data['Email'] ?? ""); ?>' readonly>
                         </div>
                         <div class="col-md-6 form-group">
                             <label>Địa chỉ nhận hàng</label>
                             <input class="form-control" name="txtdiachi" type="text" 
-                                   value='<?php echo htmlspecialchars($data['DiaChi'] ?? ""); ?>' readonly>
+                                value='<?php echo htmlspecialchars($data['DiaChi'] ?? ""); ?>' readonly>
                         </div>
                     </div>
                 </div>
@@ -90,7 +88,7 @@ $result_orders = $stmt_orders->get_result();
                                 <?php
                                 if ($result_orders->num_rows > 0) {
                                     while ($row = $result_orders->fetch_assoc()) {
-                                        echo "<option value='{$row['MaSP']}'>Đơn hàng: {$row['MaDH']} - Sản phẩm: {$row['TenSP']}</option>";
+                                        echo "<option value='{$row['MaSP']}'>Đơn hàng: {$row['MaHD']} - Sản phẩm: {$row['TenSP']}</option>";
                                     }
                                 } else {
                                     echo "<option value='' disabled>Không có sản phẩm hợp lệ.</option>";
@@ -117,22 +115,11 @@ $result_orders = $stmt_orders->get_result();
                         <h4 class="font-weight-semi-bold m-0">Chi tiết đơn hàng</h4>
                     </div>
                     <div class="card-body">
-                        <?php
-                        if ($result_orders->num_rows > 0) {
-                            $stmt_orders->execute(); // Reset pointer
-                            echo "<ul>";
-                            while ($order = $result_orders->fetch_assoc()) {
-                                echo "<li>Đơn hàng: {$order['MaDH']} - Ngày đặt: {$order['NgayHD']}</li>";
-                            }
-                            echo "</ul>";
-                        } else {
-                            echo "<p>Bạn không có đơn hàng nào hoàn tất để yêu cầu bảo hành.</p>";
-                        }
-                        ?>
+                        <p>Vui lòng chọn sản phẩm từ danh sách để biết thêm chi tiết đơn hàng.</p>
                     </div>
-                </div>
-                <div class="card-footer border-secondary bg-transparent">
-                    <button class="btn btn-lg btn-block btn-primary font-weight-bold my-3 py-3" name="btnsubmit_warranty" <?php echo ($result_orders->num_rows == 0) ? 'disabled' : ''; ?>>Gửi yêu cầu bảo hành</button>
+                    <div class="card-footer border-secondary bg-transparent">
+                        <button class="btn btn-lg btn-block btn-primary font-weight-bold my-3 py-3" name="btnsubmit_warranty" <?php echo ($result_orders->num_rows == 0) ? 'disabled' : ''; ?>>Gửi yêu cầu bảo hành</button>
+                    </div>
                 </div>
             </div>
         </div>

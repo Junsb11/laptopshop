@@ -1,4 +1,5 @@
 <?php
+// Bắt đầu session và kiểm tra đăng nhập
 if (!isset($_SESSION)) {
     session_start();
 }
@@ -7,22 +8,35 @@ if (!isset($_SESSION['tendn'])) {
     exit();
 }
 
+// Kết nối CSDL
+include "../admin/connect.php";
 include "./inc/header.php";
 include "./inc/navbar.php";
-include '../admin/connect.php';
 
-// Lấy thông tin tài khoản
-$tendn = $_SESSION['tendn'];
-$sql_dn = "SELECT * FROM tai_khoan WHERE TenDangNhap='$tendn'";
-$result_dn = mysqli_query($conn, $sql_dn);
-$data = mysqli_fetch_array($result_dn);
+// Lấy thông tin tài khoản đăng nhập
+$tendn = $_SESSION['tendn'] ?? '';
+$sql_dn = "SELECT * FROM `tai_khoan` WHERE `TenDangNhap` = ?";
+$stmt_dn = $conn->prepare($sql_dn);
+$stmt_dn->bind_param("s", $tendn);
+$stmt_dn->execute();
+$result_dn = $stmt_dn->get_result();
+$data = $result_dn->fetch_assoc();
+$stmt_dn->close();
 
-// Lấy danh sách đơn hàng của khách hàng
-$sql_orders = "SELECT * FROM hoa_don WHERE TenDangNhap = '{$data['TenDangNhap']}' AND TrangThai = 3";
-$result_orders = mysqli_query($conn, $sql_orders);
+// Lấy danh sách đơn hàng và sản phẩm liên quan
+$sql_orders = "SELECT hd.MaHD, hd.NgayHD, ctdh.MaSP, sp.TenSP
+FROM `hoa_don` hd
+JOIN `chi_tiet_hoa_don` ctdh ON hd.MaHD = ctdh.MaHD
+JOIN `san_pham` sp ON ctdh.MaSP = sp.MaSP
+WHERE hd.TenDangNhap = ? AND hd.TrangThai = 2
+ORDER BY hd.NgayHD DESC;";
+$stmt_orders = $conn->prepare($sql_orders);
+$stmt_orders->bind_param("s", $tendn);
+$stmt_orders->execute();
+$result_orders = $stmt_orders->get_result();
 ?>
 
-<!-- Page Header -->
+<!-- Header trang -->
 <div class="container-fluid bg-secondary mb-5">
     <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 300px">
         <h1 class="font-weight-semi-bold text-uppercase mb-3">Yêu cầu bảo hành</h1>
@@ -34,7 +48,7 @@ $result_orders = mysqli_query($conn, $sql_orders);
     </div>
 </div>
 
-<!-- Warranty Form -->
+<!-- Form yêu cầu bảo hành -->
 <form method="post" action="process_warranty.php">
     <div class="container-fluid pt-5">
         <div class="row px-xl-5">
@@ -45,19 +59,23 @@ $result_orders = mysqli_query($conn, $sql_orders);
                     <div class="row">
                         <div class="col-md-6 form-group">
                             <label>Họ và Tên</label>
-                            <input class="form-control" name="txthoten" type="text" value='<?php echo $data['HoTen']; ?>' readonly>
+                            <input class="form-control" name="txthoten" type="text" 
+                                   value='<?php echo htmlspecialchars($data['HoTen'] ?? ""); ?>' readonly>
                         </div>
                         <div class="col-md-6 form-group">
                             <label>Số điện thoại</label>
-                            <input class="form-control" name="txtsdt" type="text" value='<?php echo $data['SDT']; ?>' readonly>
+                            <input class="form-control" name="txtsdt" type="text" 
+                                   value='<?php echo htmlspecialchars($data['SDT'] ?? ""); ?>' readonly>
                         </div>
                         <div class="col-md-6 form-group">
                             <label>E-mail</label>
-                            <input class="form-control" name="txtemail" type="text" value='<?php echo $data['Email']; ?>' readonly>
+                            <input class="form-control" name="txtemail" type="text" 
+                                   value='<?php echo htmlspecialchars($data['Email'] ?? ""); ?>' readonly>
                         </div>
                         <div class="col-md-6 form-group">
-                            <label>Địa chỉ giao hàng</label>
-                            <input class="form-control" name="txtdiachi" type="text" value='<?php echo $data['DiaChi']; ?>' readonly>
+                            <label>Địa chỉ nhận hàng</label>
+                            <input class="form-control" name="txtdiachi" type="text" 
+                                   value='<?php echo htmlspecialchars($data['DiaChi'] ?? ""); ?>' readonly>
                         </div>
                     </div>
                 </div>
@@ -70,13 +88,12 @@ $result_orders = mysqli_query($conn, $sql_orders);
                             <select class="form-control" name="txtproduct" required>
                                 <option value="">Chọn sản phẩm...</option>
                                 <?php
-                                while ($order = mysqli_fetch_array($result_orders)) {
-                                    $order_id = $order['MaDH'];
-                                    $sql_products = "SELECT * FROM chi_tiet_don_hang WHERE MaDH = '$order_id'";
-                                    $result_products = mysqli_query($conn, $sql_products);
-                                    while ($product = mysqli_fetch_array($result_products)) {
-                                        echo "<option value='{$product['TenSP']}'>Đơn hàng: {$order_id} - Sản phẩm: {$product['TenSP']}</option>";
+                                if ($result_orders->num_rows > 0) {
+                                    while ($row = $result_orders->fetch_assoc()) {
+                                        echo "<option value='{$row['MaSP']}'>Đơn hàng: {$row['MaDH']} - Sản phẩm: {$row['TenSP']}</option>";
                                     }
+                                } else {
+                                    echo "<option value='' disabled>Không có sản phẩm hợp lệ.</option>";
                                 }
                                 ?>
                             </select>
@@ -85,17 +102,9 @@ $result_orders = mysqli_query($conn, $sql_orders);
                             <label>Lý do bảo hành</label>
                             <textarea class="form-control" name="txtreason" placeholder="Mô tả chi tiết lý do bảo hành" required></textarea>
                         </div>
-                        <div class="col-md-6 form-group">
-                            <label>Ngày lập phiếu bảo hành</label>
-                            <input class="form-control" name="txtdate" type="date" value="<?php echo date('Y-m-d'); ?>" readonly>
-                        </div>
-                        <div class="col-md-6 form-group">
-                            <label>Ngày hẹn trả sản phẩm</label>
-                            <input class="form-control" name="txtreturn_date" type="date" placeholder="Chọn ngày nhận lại sản phẩm" required>
-                        </div>
                         <div class="col-md-12 form-group">
                             <label>Phụ kiện đi kèm (nếu có)</label>
-                            <textarea class="form-control" name="txtaccessories" placeholder="Liệt kê các phụ kiện đi kèm với sản phẩm, nếu có" rows="2"></textarea>
+                            <textarea class="form-control" name="txtaccessories" placeholder="Liệt kê các phụ kiện đi kèm với sản phẩm" rows="2"></textarea>
                         </div>
                     </div>
                 </div>
@@ -109,11 +118,11 @@ $result_orders = mysqli_query($conn, $sql_orders);
                     </div>
                     <div class="card-body">
                         <?php
-                        if (mysqli_num_rows($result_orders) > 0) {
+                        if ($result_orders->num_rows > 0) {
+                            $stmt_orders->execute(); // Reset pointer
                             echo "<ul>";
-                            mysqli_data_seek($result_orders, 0); // Reset pointer
-                            while ($order = mysqli_fetch_array($result_orders)) {
-                                echo "<li>Đơn hàng: {$order['MaDH']} - Ngày đặt: {$order['NgayDat']}</li>";
+                            while ($order = $result_orders->fetch_assoc()) {
+                                echo "<li>Đơn hàng: {$order['MaDH']} - Ngày đặt: {$order['NgayHD']}</li>";
                             }
                             echo "</ul>";
                         } else {
@@ -123,11 +132,15 @@ $result_orders = mysqli_query($conn, $sql_orders);
                     </div>
                 </div>
                 <div class="card-footer border-secondary bg-transparent">
-                    <button class="btn btn-lg btn-block btn-primary font-weight-bold my-3 py-3" name="btnsubmit_warranty" <?php echo (mysqli_num_rows($result_orders) == 0) ? 'disabled' : ''; ?>>Gửi yêu cầu bảo hành</button>
+                    <button class="btn btn-lg btn-block btn-primary font-weight-bold my-3 py-3" name="btnsubmit_warranty" <?php echo ($result_orders->num_rows == 0) ? 'disabled' : ''; ?>>Gửi yêu cầu bảo hành</button>
                 </div>
             </div>
         </div>
     </div>
 </form>
 
-<?php include "./inc/footer.php"; ?>
+<?php
+$stmt_orders->close();
+$conn->close();
+include "./inc/footer.php";
+?>

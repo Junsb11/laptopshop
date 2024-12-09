@@ -42,20 +42,20 @@ git merge <branch_name>
 Gộp nhánh được chỉ định vào nhánh hiện tại.
 git branch -d <branch_name>
 Xóa một nhánh (đã được merge)
+
 6. Làm việc với Remote
-git remote add origin <repository_url>
-Liên kết repository cục bộ với remote repository.
-git push -u origin <branch_name>
-Đẩy nhánh lên remote lần đầu tiên.
-git push
-Đẩy các thay đổi lên remote.
-git pull
-Lấy các thay đổi mới nhất từ remote.
-git fetch
-Lấy dữ liệu từ remote nhưng không tự động merge.
+
+git remote add origin <repository_url>  Liên kết repository cục bộ với remote repository.
+
+git push -u origin <branch_name>  Đẩy nhánh lên remote lần đầu tiên.
+
+git push  Đẩy các thay đổi lên remote.
+
+git pull  Lấy các thay đổi mới nhất từ remote.
+
+git fetch  Lấy dữ liệu từ remote nhưng không tự động merge.
 7. Quản lý lịch sử
-git log
-Hiển thị lịch sử commit.
+git log  Hiển thị lịch sử commit.
 git log --oneline
 Hiển thị lịch sử commit ngắn gọn.
 git diff

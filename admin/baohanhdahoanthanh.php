@@ -2,7 +2,7 @@
 <?php include 'inc/sidebar.php'; ?>
 <?php
     include 'connect.php';
-    $sql_baohanhhoanthanh = "SELECT * FROM bao_hanh WHERE TrangThai = 1 ORDER BY NgayBH ASC";
+    $sql_baohanhhoanthanh = "SELECT * FROM bao_hanh WHERE TrangThai = 1 ORDER BY NgayYeuCau ASC";
     $result_hoanthanh = mysqli_query($conn, $sql_baohanhhoanthanh);
 ?>
 <div class="grid_10">
@@ -18,7 +18,6 @@
                         <th>Ngày hoàn thành</th>
                         <th>Sản phẩm</th>
                         <th>Vấn đề</th>
-                        <th>Số điện thoại</th>
                         <th>Trạng thái</th>
                     </tr>
                 </thead>
@@ -29,12 +28,11 @@
                     ?>
                     <tr class="odd gradeX">
                         <td><?php echo $stt++; ?></td>
-                        <td><?php echo $data['HoTenKH']; ?></td>
+                        <td><?php echo $data['TenDangNhap']; ?></td>
                         <td><?php echo $data['NgayYeuCau']; ?></td>
                         <td><?php echo $data['NgayHoanThanh']; ?></td>
                         <td><?php echo $data['SanPham']; ?></td>
                         <td><?php echo $data['VanDe']; ?></td>
-                        <td><?php echo $data['SDT']; ?></td>
                         <td>Đã hoàn thành</td>
                     </tr>
                     <?php

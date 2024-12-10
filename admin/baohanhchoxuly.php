@@ -2,7 +2,13 @@
 <?php include 'inc/sidebar.php'; ?>
 <?php
     include 'connect.php';
-    $sql_xembaohanh = "SELECT * FROM bao_hanh WHERE TrangThai = 0 ORDER BY NgayBH ASC";
+
+    // Sửa câu truy vấn để lấy tên sản phẩm từ bảng san_pham qua MaSP
+    $sql_xembaohanh = "SELECT bh.*, sp.TenSP FROM bao_hanh bh 
+                       JOIN san_pham sp ON bh.MaSP = sp.MaSP
+                       WHERE bh.TrangThai = 0 
+                       ORDER BY bh.NgayYeuCau ASC";
+
     $result_baohanh = mysqli_query($conn, $sql_xembaohanh);
 ?>
 <div class="grid_10">
@@ -15,9 +21,9 @@
                         <th>STT</th>
                         <th>Khách hàng</th>
                         <th>Ngày yêu cầu</th>
+                        <th>Ngày Hẹn</th>
                         <th>Sản phẩm</th>
                         <th>Vấn đề</th>
-                        <th>Số điện thoại</th>
                         <th>Trạng thái</th>
                         <th>Thao tác</th>
                     </tr>
@@ -25,15 +31,14 @@
                 <tbody>
                     <?php 
                         $stt = 1;
-                        while ($data = mysqli_fetch_array($result_baohanh)) {                                    
+                        while ($data = mysqli_fetch_array($result_baohanh)) {                                      
                     ?>
                     <tr class="odd gradeX">
                         <td><?php echo $stt++; ?></td>
-                        <td><?php echo $data['HoTenKH']; ?></td>
+                        <td><?php echo $data['TenDangNhap']; ?></td>
                         <td><?php echo $data['NgayYeuCau']; ?></td>
-                        <td><?php echo $data['SanPham']; ?></td>
-                        <td><?php echo $data['VanDe']; ?></td>
-                        <td><?php echo $data['SDT']; ?></td>
+                        <td><?php echo $data['TenSP']; ?></td> <!-- Hiển thị tên sản phẩm -->
+                        <td><?php echo $data['LyDo']; ?></td>
                         <td>Chờ xử lý</td>
                         <td>
                             <a href="xulybaohanh.php?id=<?php echo $data['MaBH']; ?>">Xử lý</a> || 

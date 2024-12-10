@@ -85,6 +85,11 @@ $result_hd = mysqli_query($conn, $sql_xemhd);
             </tbody>
         </table>
     </div>
+
+    <!-- Nút quay lại danh sách đơn hàng -->
+    <div class="text-center mt-4">
+        <a href="dsdonhang.php" class="btn btn-primary">Quay lại danh sách đơn hàng</a>
+    </div>
 </div>
 
 <?php include "./inc/footer.php"; ?>

@@ -44,8 +44,8 @@
                         <td>Đang xử lý</td>
                         <td>
                             <a href="daxuly.php?id=<?php echo $data['MaBH']; ?>">Đã xử lý</a> || 
-                            <a href="ve.php?id=<?php echo $data['MaBH']; ?>">Về lại đơn mới</a> || 
-                            <a href="huydon.php?id=<?php echo $data['MaHD']; ?>" onclick="return confirm('Bạn có muốn hủy đơn bảo hành này không?')">Hủy</a>
+                            <a href="chuaxuly.php?id=<?php echo $data['MaBH']; ?>">Về lại chưa xử lý</a> || 
+                            <a href="huybaohanh.php?id=<?php echo $data['MaBH']; ?>" onclick="return confirm('Bạn có muốn hủy đơn bảo hành này không?')">Hủy</a>
                         </td>
                     </tr>
                     <?php

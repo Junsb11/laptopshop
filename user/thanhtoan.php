@@ -19,12 +19,29 @@ if (isset($bttt)) {
     $GhiChu = mysqli_real_escape_string($conn, filter_input(INPUT_POST, 'txtghichu', FILTER_SANITIZE_STRING));
     $NgayHD = date("Y-m-d");
 
+    // Kiểm tra đầu vào
+    if (empty($TenKH) || empty($SoDienThoai) || empty($DiaChi)) {
+        echo "Vui lòng điền đầy đủ thông tin đặt hàng.";
+        exit;
+    }
+    if (!preg_match('/^[0-9]{10}$/', $SoDienThoai)) {
+        echo "Số điện thoại không hợp lệ.";
+        exit;
+    }
+    if (empty($_SESSION['cart'])) {
+        echo "Giỏ hàng trống, không thể thực hiện đặt hàng.";
+        exit;
+    }
+
     // Begin Transaction
     mysqli_begin_transaction($conn);
 
     try {
         // Thêm thông tin vào bảng hoa_don
-        $sql_inserthd = $conn->prepare("INSERT INTO hoa_don (TenDangNhap, NgayHD, TrangThai, GhiChu, HoTenNN, SDT, DiaChi) VALUES (?, ?, 0, ?, ?, ?, ?)");
+        $sql_inserthd = $conn->prepare(
+            "INSERT INTO hoa_don (TenDangNhap, NgayHD, TrangThai, GhiChu, HoTenNN, SDT, DiaChi) 
+             VALUES (?, ?, 0, ?, ?, ?, ?)"
+        );
         $sql_inserthd->bind_param("ssssss", $tendangnhap, $NgayHD, $GhiChu, $TenKH, $SoDienThoai, $DiaChi);
         $result_inserthd = $sql_inserthd->execute();
 
@@ -33,18 +50,40 @@ if (isset($bttt)) {
         }
 
         // Lấy mã hóa đơn vừa được tạo
-        $MaHD = $conn->insert_id; // Get the last inserted ID (Order ID)
+        $MaHD = $conn->insert_id;
 
-        // Thêm chi tiết hóa đơn từ giỏ hàng vào bảng chi_tiet_hoa_don
+        // Thêm chi tiết hóa đơn từ giỏ hàng vào bảng chi_tiet_hoa_don và cập nhật tồn kho
         foreach ($_SESSION['cart'] as $ds) {
             $MaSP = $ds['idsp'];
             $dongia = $ds['dongia'];
-            $TyLeKM = 0; // Khuyến mãi = 0 (có thể thay đổi tùy theo logic của bạn)
             $Sl = $ds['sl'];
 
-            // Sử dụng prepared statement để chèn chi tiết vào chi_tiet_hoa_don
-            $sql_insertcthd = $conn->prepare("INSERT INTO chi_tiet_hoa_don (MaHD, MaSP, TenKH, GiaGoc, TyLeKM, SoLuongMua) VALUES (?, ?, ?, ?, ?, ?)");
-            $sql_insertcthd->bind_param("iissii", $MaHD, $MaSP, $TenKH, $dongia, $TyLeKM, $Sl);
+            // Kiểm tra tồn kho trước khi thêm vào hóa đơn
+            $sql_checkstock = $conn->prepare("SELECT SoLuong FROM san_pham WHERE MaSP = ?");
+            $sql_checkstock->bind_param("i", $MaSP);
+            $sql_checkstock->execute();
+            $result_checkstock = $sql_checkstock->get_result();
+            $product = $result_checkstock->fetch_assoc();
+
+            if (!$product || $product['SoLuong'] < $Sl) {
+                throw new Exception("Số lượng sản phẩm không đủ trong kho để thực hiện đơn hàng.");
+            }
+
+            // Trừ số lượng sản phẩm trong kho
+            $sql_updatestock = $conn->prepare("UPDATE san_pham SET SoLuong = SoLuong - ? WHERE MaSP = ?");
+            $sql_updatestock->bind_param("ii", $Sl, $MaSP);
+            $result_updatestock = $sql_updatestock->execute();
+
+            if (!$result_updatestock) {
+                throw new Exception("Lỗi khi cập nhật số lượng tồn kho.");
+            }
+
+            // Thêm vào chi_tiet_hoa_don
+            $sql_insertcthd = $conn->prepare(
+                "INSERT INTO chi_tiet_hoa_don (MaHD, MaSP, TenKH, GiaGoc, TyLeKM, SoLuongMua) 
+                 VALUES (?, ?, ?, ?, 0, ?)"
+            );
+            $sql_insertcthd->bind_param("iissi", $MaHD, $MaSP, $TenKH, $dongia, $Sl);
             $result_insertcthd = $sql_insertcthd->execute();
 
             if (!$result_insertcthd) {

@@ -3,6 +3,7 @@
 if (!isset($_SESSION)) {
     session_start();
 }
+
 if (!isset($_SESSION['tendn'])) {
     header("Location: dangnhap.php");
     exit();
@@ -24,10 +25,13 @@ $data = $result_dn->fetch_assoc();
 $stmt_dn->close();
 
 // Lấy danh sách đơn hàng và sản phẩm liên quan
-$sql_orders = "SELECT MaHD, MaSP, TenSP 
-FROM `hoa_don`, `san_pham`, `chi_tiet_hoa_don`
-WHERE hoa_don.MaHD = chi_tiet_hoa_don.MaHD AND chi_tiet_hoa_don.MaSP = san_pham.MaSP AND
-TenDangNhap = ? AND TrangThai = 2 AND ORDER BY NgayHD DESC";
+$sql_orders = "SELECT hoa_don.MaHD, hoa_don.NgayHD, chi_tiet_hoa_don.MaSP, san_pham.TenSP
+               FROM chi_tiet_hoa_don
+               JOIN san_pham ON chi_tiet_hoa_don.MaSP = san_pham.MaSP
+               JOIN hoa_don ON hoa_don.MaHD = chi_tiet_hoa_don.MaHD
+               WHERE hoa_don.TenDangNhap = ?
+               AND hoa_don.TrangThai = 2
+               ORDER BY hoa_don.NgayHD DESC";
 $stmt_orders = $conn->prepare($sql_orders);
 $stmt_orders->bind_param("s", $tendn);
 $stmt_orders->execute();
@@ -47,41 +51,50 @@ $result_orders = $stmt_orders->get_result();
 </div>
 
 <!-- Form yêu cầu bảo hành -->
-<form method="post" action="process_warranty.php">
+<form method="post" action="xuly_baohanh.php">
     <div class="container-fluid pt-5">
         <div class="row px-xl-5">
             <!-- Thông tin khách hàng -->
-            <div class="col-lg-8">
-                <div class="mb-4">
-                    <h4 class="font-weight-semi-bold mb-4">Thông tin khách hàng</h4>
-                    <div class="row">
-                        <div class="col-md-6 form-group">
-                            <label>Họ và Tên</label>
-                            <input class="form-control" name="txthoten" type="text" 
-                                value='<?php echo htmlspecialchars($data['HoTen'] ?? ""); ?>' readonly>
-                        </div>
-                        <div class="col-md-6 form-group">
-                            <label>Số điện thoại</label>
-                            <input class="form-control" name="txtsdt" type="text" 
-                                value='<?php echo htmlspecialchars($data['SDT'] ?? ""); ?>' readonly>
-                        </div>
-                        <div class="col-md-6 form-group">
-                            <label>E-mail</label>
-                            <input class="form-control" name="txtemail" type="text" 
-                                value='<?php echo htmlspecialchars($data['Email'] ?? ""); ?>' readonly>
-                        </div>
-                        <div class="col-md-6 form-group">
-                            <label>Địa chỉ nhận hàng</label>
-                            <input class="form-control" name="txtdiachi" type="text" 
-                                value='<?php echo htmlspecialchars($data['DiaChi'] ?? ""); ?>' readonly>
+            <div class="col-lg-6 mb-4">
+                <div class="card border-secondary">
+                    <div class="card-header bg-secondary text-white">
+                        <h4 class="font-weight-semi-bold m-0">Thông tin khách hàng</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label>Họ và Tên</label>
+                                <input class="form-control" name="txthoten" type="text" 
+                                       value='<?php echo htmlspecialchars($data['HoTen'] ?? ""); ?>' readonly>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>Số điện thoại</label>
+                                <input class="form-control" name="txtsdt" type="text" 
+                                       value='<?php echo htmlspecialchars($data['SDT'] ?? ""); ?>' readonly>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>E-mail</label>
+                                <input class="form-control" name="txtemail" type="text" 
+                                       value='<?php echo htmlspecialchars($data['Email'] ?? ""); ?>' readonly>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>Địa chỉ nhận hàng</label>
+                                <input class="form-control" name="txtdiachi" type="text" 
+                                       value='<?php echo htmlspecialchars($data['DiaChi'] ?? ""); ?>' readonly>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="mb-4">
-                    <h4 class="font-weight-semi-bold mb-4">Thông tin bảo hành</h4>
-                    <div class="row">
-                        <div class="col-md-12 form-group">
+            <!-- Chi tiết bảo hành -->
+            <div class="col-lg-6 mb-4">
+                <div class="card border-secondary">
+                    <div class="card-header bg-secondary text-white">
+                        <h4 class="font-weight-semi-bold m-0">Chi tiết bảo hành</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
                             <label>Chọn sản phẩm từ đơn hàng</label>
                             <select class="form-control" name="txtproduct" required>
                                 <option value="">Chọn sản phẩm...</option>
@@ -96,26 +109,14 @@ $result_orders = $stmt_orders->get_result();
                                 ?>
                             </select>
                         </div>
-                        <div class="col-md-12 form-group">
+                        <div class="form-group">
                             <label>Lý do bảo hành</label>
                             <textarea class="form-control" name="txtreason" placeholder="Mô tả chi tiết lý do bảo hành" required></textarea>
                         </div>
-                        <div class="col-md-12 form-group">
+                        <div class="form-group">
                             <label>Phụ kiện đi kèm (nếu có)</label>
                             <textarea class="form-control" name="txtaccessories" placeholder="Liệt kê các phụ kiện đi kèm với sản phẩm" rows="2"></textarea>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Chi tiết đơn hàng -->
-            <div class="col-lg-4">
-                <div class="card border-secondary mb-5">
-                    <div class="card-header bg-secondary border-0">
-                        <h4 class="font-weight-semi-bold m-0">Chi tiết đơn hàng</h4>
-                    </div>
-                    <div class="card-body">
-                        <p>Vui lòng chọn sản phẩm từ danh sách để biết thêm chi tiết đơn hàng.</p>
                     </div>
                     <div class="card-footer border-secondary bg-transparent">
                         <button class="btn btn-lg btn-block btn-primary font-weight-bold my-3 py-3" name="btnsubmit_warranty" <?php echo ($result_orders->num_rows == 0) ? 'disabled' : ''; ?>>Gửi yêu cầu bảo hành</button>

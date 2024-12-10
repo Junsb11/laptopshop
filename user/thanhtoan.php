@@ -2,27 +2,38 @@
 session_start();
 include '../admin/connect.php';
 
+// Kiểm tra người dùng đã đăng nhập chưa
+if (!isset($_SESSION['tendn'])) {
+    header("Location: login.php");
+    exit;
+}
+
 // Kiểm tra nút thanh toán đã được nhấn hay chưa
 $bttt = filter_input(INPUT_POST, 'btnthanhtoan');
 if (isset($bttt)) {
-    // Lấy thông tin từ form
+    // Lấy thông tin từ form và sanitize
     $tendangnhap = $_SESSION['tendn'];
-    $TenKH = filter_input(INPUT_POST, 'txthoten');
-    $SoDienThoai = filter_input(INPUT_POST, 'txtsdt');
-    $DiaChi = filter_input(INPUT_POST, 'txtdiachi');
-    $GhiChu = filter_input(INPUT_POST, 'txtghichu');
+    $TenKH = mysqli_real_escape_string($conn, filter_input(INPUT_POST, 'txthoten', FILTER_SANITIZE_STRING));
+    $SoDienThoai = mysqli_real_escape_string($conn, filter_input(INPUT_POST, 'txtsdt', FILTER_SANITIZE_STRING));
+    $DiaChi = mysqli_real_escape_string($conn, filter_input(INPUT_POST, 'txtdiachi', FILTER_SANITIZE_STRING));
+    $GhiChu = mysqli_real_escape_string($conn, filter_input(INPUT_POST, 'txtghichu', FILTER_SANITIZE_STRING));
     $NgayHD = date("Y-m-d");
 
-    // Thêm thông tin vào bảng hoa_don
-    $sql_inserthd = "INSERT INTO hoa_don (TenDangNhap, NgayHD, TrangThai, GhiChu, HoTenNN, SDT, DiaChi) VALUES ('$tendangnhap', '$NgayHD', 0, '$GhiChu', '$TenKH', '$SoDienThoai', '$DiaChi')";
-    $result_inserthd = mysqli_query($conn, $sql_inserthd);
+    // Begin Transaction
+    mysqli_begin_transaction($conn);
 
-    if ($result_inserthd) {
+    try {
+        // Thêm thông tin vào bảng hoa_don
+        $sql_inserthd = $conn->prepare("INSERT INTO hoa_don (TenDangNhap, NgayHD, TrangThai, GhiChu, HoTenNN, SDT, DiaChi) VALUES (?, ?, 0, ?, ?, ?, ?)");
+        $sql_inserthd->bind_param("ssssss", $tendangnhap, $NgayHD, $GhiChu, $TenKH, $SoDienThoai, $DiaChi);
+        $result_inserthd = $sql_inserthd->execute();
+
+        if (!$result_inserthd) {
+            throw new Exception("Lỗi khi thêm hóa đơn.");
+        }
+
         // Lấy mã hóa đơn vừa được tạo
-        $qrcthd = "SELECT MaHD FROM hoa_don ORDER BY MaHD DESC LIMIT 1";
-        $kq = mysqli_query($conn, $qrcthd);
-        $row = mysqli_fetch_array($kq);
-        $MaHD = $row['MaHD'];
+        $MaHD = $conn->insert_id; // Get the last inserted ID (Order ID)
 
         // Thêm chi tiết hóa đơn từ giỏ hàng vào bảng chi_tiet_hoa_don
         foreach ($_SESSION['cart'] as $ds) {
@@ -30,20 +41,26 @@ if (isset($bttt)) {
             $dongia = $ds['dongia'];
             $TyLeKM = 0; // Khuyến mãi = 0 (có thể thay đổi tùy theo logic của bạn)
             $Sl = $ds['sl'];
-            $sql_insertcthd = "INSERT INTO chi_tiet_hoa_don (MaHD, MaSP, TenKH, GiaGoc, TyLeKM, SoLuongMua) VALUES ('$MaHD', '$MaSP', '$TenKH', '$dongia', '$TyLeKM', '$Sl')";
-            $result_insertcthd = mysqli_query($conn, $sql_insertcthd);
+
+            // Sử dụng prepared statement để chèn chi tiết vào chi_tiet_hoa_don
+            $sql_insertcthd = $conn->prepare("INSERT INTO chi_tiet_hoa_don (MaHD, MaSP, TenKH, GiaGoc, TyLeKM, SoLuongMua) VALUES (?, ?, ?, ?, ?, ?)");
+            $sql_insertcthd->bind_param("iissii", $MaHD, $MaSP, $TenKH, $dongia, $TyLeKM, $Sl);
+            $result_insertcthd = $sql_insertcthd->execute();
 
             if (!$result_insertcthd) {
-                echo "Đặt hàng không thành công";
-                exit; // Thoát khỏi vòng lặp nếu thất bại
+                throw new Exception("Lỗi khi thêm chi tiết hóa đơn.");
             }
         }
 
-        // Đặt hàng thành công, hiển thị thông báo
-        // Xóa giỏ hàng sau khi đặt hàng thành công
+        // Commit transaction
+        mysqli_commit($conn);
+
+        // Đặt hàng thành công, xóa giỏ hàng sau khi đặt hàng thành công
         unset($_SESSION['cart']);
-    } else {
-        echo "Đặt hàng không thành công";
+    } catch (Exception $e) {
+        // Rollback transaction nếu có lỗi
+        mysqli_roll_back($conn);
+        echo "Đặt hàng không thành công. Lỗi: " . $e->getMessage();
         exit;
     }
 }

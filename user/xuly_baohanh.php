@@ -22,8 +22,8 @@ if (empty($txtproduct) || empty($txtreason)) {
 }
 
 // Lấy thông tin sản phẩm và đơn hàng
-$sql_insert = "INSERT INTO bao_hanh (TenDangNhap, MaSP, LyDo, NgayYeuCau,GhiChu) 
-               VALUES (?, ?, ?, ?, ?)";
+$sql_insert = "INSERT INTO bao_hanh (TenDangNhap, MaSP, LyDo, NgayYeuCau, GhiChu, TrangThai) 
+               VALUES (?, ?, ?, ?, ?, 0)";
 $stmt_insert = $conn->prepare($sql_insert);
 $stmt_insert->bind_param("sssss", $_SESSION['tendn'], $txtproduct, $txtreason, $txtaccessories, $txtngayyeucau);
 

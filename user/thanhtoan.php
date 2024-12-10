@@ -59,18 +59,18 @@ if (isset($bttt)) {
             $Sl = $ds['sl'];
 
             // Kiểm tra tồn kho trước khi thêm vào hóa đơn
-            $sql_checkstock = $conn->prepare("SELECT SoLuong FROM san_pham WHERE MaSP = ?");
+            $sql_checkstock = $conn->prepare("SELECT so_luong FROM san_pham WHERE MaSP = ?");
             $sql_checkstock->bind_param("i", $MaSP);
             $sql_checkstock->execute();
             $result_checkstock = $sql_checkstock->get_result();
             $product = $result_checkstock->fetch_assoc();
 
-            if (!$product || $product['SoLuong'] < $Sl) {
+            if (!$product || $product['so_luong'] < $Sl) {
                 throw new Exception("Số lượng sản phẩm không đủ trong kho để thực hiện đơn hàng.");
             }
 
             // Trừ số lượng sản phẩm trong kho
-            $sql_updatestock = $conn->prepare("UPDATE san_pham SET SoLuong = SoLuong - ? WHERE MaSP = ?");
+            $sql_updatestock = $conn->prepare("UPDATE san_pham SET so_luong = so_luong - ? WHERE MaSP = ?");
             $sql_updatestock->bind_param("ii", $Sl, $MaSP);
             $result_updatestock = $sql_updatestock->execute();
 
@@ -112,48 +112,119 @@ if (isset($bttt)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đặt hàng thành công</title>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f3f3f3;
+            font-family: 'Arial', sans-serif;
+            background-color: #f1f1f1;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
         }
+
         .container {
             background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
             text-align: center;
-            width: 400px;
+            width: 90%;
+            max-width: 400px;
+            animation: fadeIn 0.5s ease-in-out;
         }
+
+        /* Add fade-in effect */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .success-icon {
-            width: 100px;
-            height: 100px;
+            width: 120px;
+            height: 120px;
             background-image: url('https://cdn.sforum.vn/sforum/wp-content/uploads/2023/01/asus-rog-ces-2023-02.jpg');
             background-size: cover;
-            margin: 20px auto;
+            background-position: center;
+            border-radius: 50%;
+            margin: 0 auto 20px auto;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            animation: bounce 1.5s infinite;
         }
+
+        /* Add bounce animation */
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
         h2 {
             color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
         }
+
         p {
             color: #666;
+            font-size: 16px;
             margin-bottom: 20px;
         }
+
         .home-link {
             display: inline-block;
-            padding: 10px 20px;
+            padding: 12px 25px;
             background-color: #4CAF50;
             color: white;
+            font-size: 16px;
             text-decoration: none;
-            border-radius: 5px;
-            transition: background-color 0.3s;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
+
         .home-link:hover {
             background-color: #45a049;
+            transform: translateY(-3px);
+        }
+
+        .home-link:active {
+            background-color: #388e3c;
+            transform: translateY(1px);
+        }
+
+        .home-link:focus {
+            outline: none;
+        }
+
+        /* Add responsive design */
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+
+            .home-link {
+                font-size: 14px;
+                padding: 10px 20px;
+            }
         }
     </style>
 </head>

@@ -2,12 +2,19 @@
 <?php include 'inc/sidebar.php'; ?>
 <?php
     include 'connect.php';
-    $sql_baohanhhoanthanh = "SELECT * FROM bao_hanh WHERE TrangThai = 1 ORDER BY NgayYeuCau ASC";
-    $result_hoanthanh = mysqli_query($conn, $sql_baohanhhoanthanh);
+
+    // Truy vấn lấy yêu cầu bảo hành đã xử lý (Trang thái = 3)
+    $sql_baohanhdaxuly = "SELECT bh.*, sp.TenSP FROM bao_hanh bh 
+                          JOIN san_pham sp ON bh.MaSP = sp.MaSP
+                          WHERE bh.TrangThai = 3
+                          ORDER BY bh.NgayHen ASC";  // Ngày hẹn để theo dõi quá trình xử lý
+
+    $result_baohanhdaxuly = mysqli_query($conn, $sql_baohanhdaxuly);
 ?>
+
 <div class="grid_10">
     <div class="box round first grid">
-        <h2>Yêu cầu bảo hành đã hoàn thành</h2>
+        <h2>Yêu cầu bảo hành đã xử lý</h2>
         <div class="block">  
             <table class="data display datatable" id="example">
                 <thead>
@@ -15,25 +22,30 @@
                         <th>STT</th>
                         <th>Khách hàng</th>
                         <th>Ngày yêu cầu</th>
-                        <th>Ngày hoàn thành</th>
+                        <th>Ngày hẹn</th>
                         <th>Sản phẩm</th>
                         <th>Vấn đề</th>
                         <th>Trạng thái</th>
+                        <th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php 
                         $stt = 1;
-                        while ($data = mysqli_fetch_array($result_hoanthanh)) {                                    
+                        while ($data = mysqli_fetch_array($result_baohanhdaxuly)) {                                  
                     ?>
                     <tr class="odd gradeX">
                         <td><?php echo $stt++; ?></td>
                         <td><?php echo $data['TenDangNhap']; ?></td>
                         <td><?php echo $data['NgayYeuCau']; ?></td>
-                        <td><?php echo $data['NgayHoanThanh']; ?></td>
-                        <td><?php echo $data['SanPham']; ?></td>
-                        <td><?php echo $data['VanDe']; ?></td>
-                        <td>Đã hoàn thành</td>
+                        <td><?php echo $data['NgayHen']; ?></td>
+                        <td><?php echo $data['TenSP']; ?></td>
+                        <td><?php echo $data['LyDo']; ?></td>
+                        <td>Đã xử lý</td>
+                        <td>
+                            <!-- Nếu đã xử lý, có thể chỉ xem chi tiết hoặc không thao tác thêm -->
+                            <a href="xemchitiet.php?id=<?php echo $data['MaBH']; ?>">Xem chi tiết</a>
+                        </td>
                     </tr>
                     <?php
                         }

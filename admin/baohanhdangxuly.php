@@ -3,18 +3,18 @@
 <?php
     include 'connect.php';
 
-    // Truy vấn lấy yêu cầu bảo hành đã hủy (Trang thái = 2)
-    $sql_baohanhdahuy = "SELECT bh.*, sp.TenSP FROM bao_hanh bh 
-                         JOIN san_pham sp ON bh.MaSP = sp.MaSP
-                         WHERE bh.TrangThai = 2
-                         ORDER BY bh.NgayBH ASC";  // Ngày bảo hành để theo dõi các yêu cầu đã hủy
+    // Truy vấn lấy yêu cầu bảo hành đang xử lý (Trang thái = 1)
+    $sql_baohanhdangxuly = "SELECT bh.*, sp.TenSP FROM bao_hanh bh 
+                            JOIN san_pham sp ON bh.MaSP = sp.MaSP
+                            WHERE bh.TrangThai = 1
+                            ORDER BY bh.NgayHen ASC";  // Ngày hẹn để dễ dàng theo dõi
 
-    $result_baohanhdahuy = mysqli_query($conn, $sql_baohanhdahuy);
+    $result_baohanhdangxuly = mysqli_query($conn, $sql_baohanhdangxuly);
 ?>
 
 <div class="grid_10">
     <div class="box round first grid">
-        <h2>Yêu cầu bảo hành đã hủy</h2>
+        <h2>Yêu cầu bảo hành đang xử lý</h2>
         <div class="block">  
             <table class="data display datatable" id="example">
                 <thead>
@@ -22,27 +22,31 @@
                         <th>STT</th>
                         <th>Khách hàng</th>
                         <th>Ngày yêu cầu</th>
+                        <th>Ngày hẹn</th>
                         <th>Sản phẩm</th>
                         <th>Vấn đề</th>
-                        <th>Số điện thoại</th>
-                        <th>Ghi chú hủy</th>
                         <th>Trạng thái</th>
+                        <th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php 
                         $stt = 1;
-                        while ($data = mysqli_fetch_array($result_baohanhdahuy)) {                                 
+                        while ($data = mysqli_fetch_array($result_baohanhdangxuly)) {                                  
                     ?>
                     <tr class="odd gradeX">
                         <td><?php echo $stt++; ?></td>
                         <td><?php echo $data['TenDangNhap']; ?></td>
                         <td><?php echo $data['NgayYeuCau']; ?></td>
+                        <td><?php echo $data['NgayHen']; ?></td>
                         <td><?php echo $data['TenSP']; ?></td>
                         <td><?php echo $data['LyDo']; ?></td>
-                        <td><?php echo $data['SDT']; ?></td>
-                        <td><?php echo $data['GhiChuHuy']; ?></td>
-                        <td>Đã hủy</td>
+                        <td>Đang xử lý</td>
+                        <td>
+                            <a href="daxuly.php?id=<?php echo $data['MaBH']; ?>">Đã xử lý</a> || 
+                            <a href="ve.php?id=<?php echo $data['MaBH']; ?>">Về lại đơn mới</a> || 
+                            <a href="huydon.php?id=<?php echo $data['MaHD']; ?>" onclick="return confirm('Bạn có muốn hủy đơn bảo hành này không?')">Hủy</a>
+                        </td>
                     </tr>
                     <?php
                         }

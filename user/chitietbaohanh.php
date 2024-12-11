@@ -25,7 +25,7 @@ if ($mabh === null) {
 // Truy vấn thông tin chi tiết bảo hành từ cơ sở dữ liệu
 $sql_chitiet_baohanh = "
     SELECT 
-        s.TenSP, s.HinhAnh, b.MaBH, b.LyDo, b.NgayYeuCau, b.NgayKetThuc, 
+        s.TenSP, s.HinhAnh, b.MaBH, b.LyDo, b.NgayYeuCau, b.NgayHoanThanh, 
         b.NgayHen, b.TrangThai
     FROM 
         bao_hanh b
@@ -80,8 +80,8 @@ $data_chitiet = mysqli_fetch_array($result_chitiet);
                             <td><?php echo ($data_chitiet['NgayHen'] !== null) ? date('d/m/Y', strtotime($data_chitiet['NgayHen'])) : 'Chưa xác định'; ?></td>
                         </tr>
                         <tr>
-                            <th>Ngày kết thúc</th>
-                            <td><?php echo ($data_chitiet['NgayKetThuc'] !== null) ? date('d/m/Y', strtotime($data_chitiet['NgayKetThuc'])) : 'Chưa xác định'; ?></td>
+                            <th>Ngày hoàn thành</th></th>
+                            <td><?php echo ($data_chitiet['NgayHoanThanh'] !== null) ? date('d/m/Y', strtotime($data_chitiet['NgayHoanThanh'])) : 'Chưa xác định'; ?></td>
                         </tr>
                         <tr>
                             <th>Trạng thái</th>

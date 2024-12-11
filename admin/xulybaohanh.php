@@ -17,9 +17,13 @@ if ($idbh) {
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Lấy mã nhân viên và ngày hẹn từ form
         $maNV = filter_input(INPUT_POST, 'maNV', FILTER_VALIDATE_INT);
-        $ngayHen = date('Y-m-d H:i:s'); // Ngày giờ hiện tại
+        $ngayHen = filter_input(INPUT_POST, 'ngayHen', FILTER_SANITIZE_STRING);
 
-        if ($maNV && $ngayHen) {
+        // Kiểm tra tính hợp lệ của ngày hẹn
+        $date_check = DateTime::createFromFormat('Y-m-d\TH:i', $ngayHen);
+        $is_valid_date = $date_check && $date_check->format('Y-m-d\TH:i') === $ngayHen;
+
+        if ($maNV && $is_valid_date) {
             // Cập nhật trạng thái yêu cầu bảo hành và thêm mã nhân viên và ngày hẹn
             $sql_update = "UPDATE bao_hanh SET MaNV = ?, NgayHen = ?, TrangThai = 1 WHERE MaBH = ?";
             $stmt_update = $conn->prepare($sql_update);
@@ -33,7 +37,7 @@ if ($idbh) {
                 $error_message = "Cập nhật không thành công.";
             }
         } else {
-            $error_message = "Dữ liệu không hợp lệ.";
+            $error_message = "Dữ liệu không hợp lệ. Hãy kiểm tra lại.";
         }
     }
 } else {
@@ -79,7 +83,7 @@ if ($idbh) {
 
             <div class="mb-3">
                 <label for="ngayHen" class="form-label">Ngày hẹn:</label>
-                <input type="text" id="ngayHen" class="form-control" value="<?php echo date('Y-m-d H:i:s'); ?>" disabled>
+                <input type="datetime-local" id="ngayHen" name="ngayHen" class="form-control" required>
             </div>
 
             <button type="submit" class="btn btn-primary w-100">Xử lý</button>

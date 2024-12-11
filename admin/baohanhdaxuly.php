@@ -3,10 +3,9 @@
 <?php
     include 'connect.php';
 
-    // Truy vấn lấy yêu cầu bảo hành đã xử lý (Trang thái = 3)
     $sql_baohanhdaxuly = "SELECT bh.*, sp.TenSP FROM bao_hanh bh 
                           JOIN san_pham sp ON bh.MaSP = sp.MaSP
-                          WHERE bh.TrangThai = 3
+                          WHERE bh.TrangThai = 2
                           ORDER BY bh.NgayHen ASC";  // Ngày hẹn để theo dõi quá trình xử lý
 
     $result_baohanhdaxuly = mysqli_query($conn, $sql_baohanhdaxuly);

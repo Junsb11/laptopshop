@@ -50,7 +50,7 @@
                     <ul class="submenu">
                         <li><a href="baohanhchoxuly.php">Đơn chờ xử lý</a> </li>
                         <li><a href="baohanhdangxuly.php">Đơn đang xử lý</a> </li>
-                        <li><a href="baohanhdahoanthanh.php">Đơn đã hoàn tất</a> </li>
+                        <li><a href="baohanhdaxuly.php">Đơn đã hoàn tất</a> </li>
                         <li><a href="baohanhdahuy.php">Đơn đã hủy</a> </li>
                     </ul>
                 </li>

@@ -8,28 +8,16 @@
     $page = isset($_GET['page']) && is_numeric($_GET['page']) ? intval($_GET['page']) : 1;
     $offset = ($page - 1) * $limit;
 
-    // Modified SQL query to include a count of approved invoices (SoHoaDonDuyet) for each employee
-    $sql_xemnv = "
-        SELECT 
-            nv.MaNV, 
-            nv.HoTen, 
-            nv.Email, 
-            nv.SDT, 
-            nv.VaiTro, 
-            nv.LuongCB, 
-            nv.ChamCong, 
-            nv.TrangThai, 
-            nv.GhiChu, 
-            COUNT(hd.MaHD) AS SoHoaDonDuyet 
-        FROM 
-            nhan_vien nv 
-        LEFT JOIN 
-            hoa_don hd ON nv.MaNV = hd.MaNV AND hd.TrangThai = 'Duyet'  -- Adjust the condition for approved invoices
-        GROUP BY 
-            nv.MaNV 
-        ORDER BY 
-            nv.MaNV 
-        LIMIT ?, ?";
+    // Modified SQL query to include a count of approved invoices (SoHoaDonDuyet) and handled warranty orders (SoDonBaoHanh) for each employee
+    $sql_xemnv = "SELECT nv.MaNV, nv.HoTen, nv.Email,  nv.SDT, nv.VaiTro, nv.LuongCB, nv.TrangThai, nv.GhiChu,
+        IFNULL(SUM(CASE WHEN hd.TrangThai = 1 THEN 1 ELSE 0 END), 0) AS SoHoaDonDuyet,  -- Số hoá đơn đã duyệt
+        IFNULL(SUM(CASE WHEN bh.TrangThai = 2 THEN 1 ELSE 0 END), 0) AS SoDonBaoHanh  -- Số đơn bảo hành đã xử lý
+    FROM nhan_vien nv
+    LEFT JOIN hoa_don hd ON nv.MaNV = hd.MaNV
+    LEFT JOIN bao_hanh bh ON nv.MaNV = bh.MaNV
+    GROUP BY nv.MaNV 
+    ORDER BY nv.MaNV
+    LIMIT ?, ?";
     
     $stmt = $conn->prepare($sql_xemnv);
     $stmt->bind_param("ii", $offset, $limit);
@@ -39,8 +27,6 @@
     if (!$result_nv) {
         die("Error fetching employee data: " . $stmt->error);
     }
-
-    // Count total records for pagination
     $result_count = $conn->query("SELECT COUNT(*) AS total FROM nhan_vien");
     $total_rows = $result_count->fetch_assoc()['total'];
     $total_pages = ceil($total_rows / $limit);
@@ -70,7 +56,19 @@
                 <?php 
                     $stt = $offset + 1;
                     while ($data = $result_nv->fetch_assoc()) {                                  
-                        $chamCongTong = $data['ChamCong'] + $data['SoHoaDonDuyet'];
+                        $soHoaDonDuyet = $data['SoHoaDonDuyet'];
+                        $soDonBaoHanh = $data['SoDonBaoHanh'];
+                        $tongDon = $soHoaDonDuyet + $soDonBaoHanh;
+
+                        // Xác định số ngày công
+                        $soNgayCong =$data['LuongCB']/30;
+
+                        // Tính lương thực tế
+                        $luongThucTe = $soNgayCong + $tongDon;// Chia đều cho 30 ngày trong tháng
+
+                        // Tích hợp hệ số thưởng (nếu có)
+                        $heSoThuong = ($tongDon >= 50) ? 1.1 : 1.0; // Ví dụ: nếu xử lý trên 100 đơn, thưởng thêm 10%
+                        $luongThucTe *= $heSoThuong;
                 ?>
                     <tr class="odd gradeX">
                         <td><?php echo htmlspecialchars($stt++); ?></td>
@@ -79,12 +77,9 @@
                         <td><?php echo htmlspecialchars($data['SDT']); ?></td>
                         <td><?php echo htmlspecialchars($data['VaiTro']); ?></td>
                         <td><?php echo number_format($data['LuongCB'], 0, ',', '.');?> VND</td>
-                        <td><?php echo htmlspecialchars($chamCongTong);?> ngày</td>
+                        <td><?php echo htmlspecialchars($soNgayCong);?> ngày</td>
                         <td><?php echo $data['TrangThai'] === 'Đang làm' ? 'Đang làm' : 'Đã nghỉ';?></td>
-                        <td><?php 
-                            // Calculate actual salary based on attendance (assuming 30 days per month)
-                            $luongThucTe = $data['LuongCB'] * $chamCongTong / 30; 
-                            echo number_format($luongThucTe, 0, ',', '.');?> VND</td>
+                        <td><?php echo number_format($luongThucTe, 0, ',', '.');?> VND</td>
                         <td><?php echo htmlspecialchars($data['GhiChu']); ?></td>
                         <td>
                             <a href="suanhanvien.php?id=<?php echo urlencode($data['MaNV']); ?>">Edit</a> || 

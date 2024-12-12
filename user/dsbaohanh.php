@@ -92,6 +92,9 @@ $count_dahuy = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM bao_hanh WHERE
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title"><?php echo $title; ?></h4>
+                    <?php if (isset($_GET['msg'])) { ?>
+                        <div class="alert alert-info text-center"><?php echo htmlspecialchars($_GET['msg']); ?></div>
+                    <?php } ?>
                     <div class="table-responsive">
                         <table class="table table-bordered">
                             <thead class="thead-light">
@@ -139,7 +142,12 @@ $count_dahuy = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM bao_hanh WHERE
                                             ?>
                                         </td>
                                         <td>
-                                            <a href="chitietbaohanh.php?mabh=<?php echo $data['MaBH']; ?>" class="btn btn-primary btn-sm">Chi tiết</a>
+                                            <a href="chitietbaohanh.php?mabh=<?php echo $data['MaBH']; ?>" class="btn btn-primary btn-sm btn-block">Chi tiết</a>
+                                            <?php if ($data['TrangThai'] == 0) { ?>
+                                                <a href="huybaohanh.php?mabh=<?php echo $data['MaBH']; ?>" class="btn btn-danger btn-sm btn-block" onclick="return confirm('Bạn có chắc chắn muốn hủy yêu cầu này không?');">Hủy</a>
+                                            <?php } elseif ($data['TrangThai'] == 2) { ?>
+                                                <a href="xoabaohanh.php?mabh=<?php echo $data['MaBH']; ?>" class="btn btn-danger btn-sm btn-block" onclick="return confirm('Bạn có chắc chắn muốn xóa yêu cầu này không?');">Xóa</a>
+                                            <?php } ?>
                                         </td>
                                     </tr>
                                 <?php } ?>

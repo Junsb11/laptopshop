@@ -3,9 +3,10 @@
 <?php
     include 'connect.php';
 
-    // Truy vấn lấy yêu cầu bảo hành đã hủy (Trang thái = 2)
-    $sql_baohanhdahuy = "SELECT bh.*, sp.TenSP FROM bao_hanh bh 
+    // Truy vấn lấy yêu cầu bảo hành đã hủy (Trang thái = 2) và số điện thoại từ bảng tai_khoan
+    $sql_baohanhdahuy = "SELECT bh.*, sp.TenSP, tk.SDT FROM bao_hanh bh 
                          JOIN san_pham sp ON bh.MaSP = sp.MaSP
+                         JOIN tai_khoan tk ON bh.TenDangNhap = tk.TenDangNhap
                          WHERE bh.TrangThai = 2
                          ORDER BY bh.NgayYeuCau ASC";  // Ngày yêu cầu để theo dõi các yêu cầu đã hủy
 
@@ -41,7 +42,7 @@
                         <td><?php echo $data['TenSP']; ?></td>
                         <td><?php echo $data['LyDo']; ?></td>
                         <td><?php echo $data['SDT']; ?></td>
-                        <td><?php echo $data['GhiChuHuy']; ?></td>
+                        <td><?php echo $data['GhiChu']; ?></td>
                         <td>Đã hủy</td>
                     </tr>
                     <?php

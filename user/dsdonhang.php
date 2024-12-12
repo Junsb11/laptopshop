@@ -59,55 +59,37 @@ $count_dahuy = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM hoa_don WHERE 
     .fixed-sidebar {
         position: fixed;
         top: 200px;
-        /* Adjust this value based on your header height */
         width: 350px;
-        /* Adjust width as necessary */
     }
 
     .content {
         margin-left: 350px;
-        /* Adjust this value based on the fixed sidebar width */
         margin-bottom: 180px;
     }
 
-    /* Cải tiến kiểu dáng cho nút "Xác nhận đã nhận" */
     .btn-xacnhan {
         background-color: #28a745;
-        /* Màu nền xanh lá */
         color: white;
-        /* Màu chữ trắng */
         border-radius: 5px;
-        /* Viền bo tròn */
         padding: 5px 10px;
-        /* Giảm kích thước padding để làm nhỏ nút */
         font-size: 12px;
-        /* Đặt kích thước chữ nhỏ hơn */
         font-weight: bold;
-        /* Làm đậm chữ */
         transition: all 0.3s ease;
-        /* Thêm hiệu ứng chuyển tiếp khi hover */
     }
 
     .btn-xacnhan:hover {
         background-color: #218838;
-        /* Màu nền khi hover */
         transform: scale(1.05);
-        /* Tăng kích thước khi hover */
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        /* Thêm bóng đổ khi hover */
     }
 
     .btn-xacnhan:active {
         background-color: #1e7e34;
-        /* Màu nền khi click */
         transform: scale(1);
-        /* Trở về kích thước bình thường khi click */
     }
 
-    /* Thêm biểu tượng vào nút */
     .btn-xacnhan i {
         margin-right: 5px;
-        /* Khoảng cách giữa biểu tượng và chữ */
     }
 </style>
 
@@ -159,8 +141,7 @@ $count_dahuy = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM hoa_don WHERE 
                             <tbody>
                                 <?php
                                 $stt = 1;
-                                while ($data = mysqli_fetch_array($result_hd)) {
-                                ?>
+                                while ($data = mysqli_fetch_array($result_hd)) { ?>
                                     <tr>
                                         <td><?php echo $stt++; ?></td>
                                         <td>HD<?php echo $data['MaHD']; ?></td>
@@ -189,19 +170,22 @@ $count_dahuy = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM hoa_don WHERE 
                                             }
                                             ?>
                                         </td>
-
                                         <td>
                                             <?php if ($data['TrangThai'] == 1) { ?>
                                                 <a href="xacnhandonhang.php?mahd=<?php echo $data['MaHD']; ?>" class="btn btn-xacnhan">
                                                     <i class="fas fa-check-circle"></i> Xác nhận
                                                 </a>
                                             <?php } ?>
-                                            <a href="chitietdonhang.php?mahd=<?php echo $data['MaHD']; ?>" class="btn btn-primary btn-sm">Chi tiết</a>
+                                            <a href="chitietdonhang.php?mahd=<?php echo $data['MaHD']; ?>" class="btn btn-primary btn-sm btn-block">Chi tiết</a>
+                                            <?php if ($data['TrangThai'] == 0) { ?>
+                                                <a href="huydonhang.php?mabh=<?php echo $data['MaHD']; ?>" class="btn btn-danger btn-sm btn-block" onclick="return confirm('Bạn có chắc chắn muốn hủy yêu cầu này không?');">Hủy</a>
+                                            <?php } elseif ($data['TrangThai'] == 2) { ?>
+                                                <a href="xoadonhang.php?mabh=<?php echo $data['MaHD']; ?>" class="btn btn-danger btn-sm btn-block" onclick="return confirm('Bạn có chắc chắn muốn xóa yêu cầu này không?');">Xóa</a>
+                                            <?php } ?>
                                         </td>
                                     </tr>
-                                <?php }
-                                
-                                ?>
+                                <?php } ?>
+
                                 <?php if (mysqli_num_rows($result_hd) == 0) { ?>
                                     <tr>
                                         <td colspan="8" class="text-center">Không có đơn hàng nào.</td>

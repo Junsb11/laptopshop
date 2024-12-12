@@ -8,17 +8,17 @@
     $page = isset($_GET['page']) && is_numeric($_GET['page']) ? intval($_GET['page']) : 1;
     $offset = ($page - 1) * $limit;
 
-    // Modified SQL query to include a count of approved invoices (SoHoaDonDuyet) and handled warranty orders (SoDonBaoHanh) for each employee
-    $sql_xemnv = "SELECT nv.MaNV, nv.HoTen, nv.Email,  nv.SDT, nv.VaiTro, nv.LuongCB, nv.TrangThai, nv.GhiChu,
-        IFNULL(SUM(CASE WHEN hd.TrangThai = 1 THEN 1 ELSE 0 END), 0) AS SoHoaDonDuyet,  -- Số hoá đơn đã duyệt
-        IFNULL(SUM(CASE WHEN bh.TrangThai = 2 THEN 1 ELSE 0 END), 0) AS SoDonBaoHanh  -- Số đơn bảo hành đã xử lý
+    // SQL query to fetch employee data with counts for approved invoices and handled warranty orders
+    $sql_xemnv = "SELECT nv.MaNV, nv.HoTen, nv.Email, nv.SDT, nv.VaiTro, nv.LuongCB, nv.TrangThai, nv.GhiChu,
+        IFNULL(SUM(CASE WHEN hd.TrangThai = 1 THEN 1 ELSE 0 END), 0) AS SoHoaDonDuyet,
+        IFNULL(SUM(CASE WHEN bh.TrangThai = 2 THEN 1 ELSE 0 END), 0) AS SoDonBaoHanh
     FROM nhan_vien nv
     LEFT JOIN hoa_don hd ON nv.MaNV = hd.MaNV
     LEFT JOIN bao_hanh bh ON nv.MaNV = bh.MaNV
     GROUP BY nv.MaNV 
     ORDER BY nv.MaNV
     LIMIT ?, ?";
-    
+
     $stmt = $conn->prepare($sql_xemnv);
     $stmt->bind_param("ii", $offset, $limit);
     $stmt->execute();
@@ -27,6 +27,7 @@
     if (!$result_nv) {
         die("Error fetching employee data: " . $stmt->error);
     }
+
     $result_count = $conn->query("SELECT COUNT(*) AS total FROM nhan_vien");
     $total_rows = $result_count->fetch_assoc()['total'];
     $total_pages = ceil($total_rows / $limit);
@@ -60,14 +61,19 @@
                         $soDonBaoHanh = $data['SoDonBaoHanh'];
                         $tongDon = $soHoaDonDuyet + $soDonBaoHanh;
 
-                        // Xác định số ngày công
-                        $soNgayCong =$data['LuongCB']/30;
+                        // Fetch the number of working days for the current month
+                        $sql_chamcong = "SELECT COUNT(*) AS SoNgayLamViec FROM ChamCong WHERE MaNV = ? AND MONTH(Ngay) = MONTH(CURDATE()) AND YEAR(Ngay) = YEAR(CURDATE())";
+                        $stmt_chamcong = $conn->prepare($sql_chamcong);
+                        $stmt_chamcong->bind_param("i", $data['MaNV']);
+                        $stmt_chamcong->execute();
+                        $result_chamcong = $stmt_chamcong->get_result();
+                        $soNgayCong = $result_chamcong->fetch_assoc()['SoNgayLamViec'] ?? 0;
 
-                        // Tính lương thực tế
-                        $luongThucTe = $soNgayCong + $tongDon;// Chia đều cho 30 ngày trong tháng
+                        // Calculate actual salary
+                        $luongThucTe = ($data['LuongCB'] / 30) * $soNgayCong;
 
-                        // Tích hợp hệ số thưởng (nếu có)
-                        $heSoThuong = ($tongDon >= 50) ? 1.1 : 1.0; // Ví dụ: nếu xử lý trên 100 đơn, thưởng thêm 10%
+                        // Apply a bonus multiplier if applicable
+                        $heSoThuong = ($tongDon >= 50) ? 1.1 : 1.0;
                         $luongThucTe *= $heSoThuong;
                 ?>
                     <tr class="odd gradeX">

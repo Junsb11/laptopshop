@@ -3,8 +3,8 @@
 <?php
     include 'connect.php';
 
-    // Sửa câu truy vấn để lấy tên sản phẩm từ bảng san_pham qua MaSP
-    $sql_xembaohanh = "SELECT bh.*, sp.TenSP FROM bao_hanh bh 
+    // Cập nhật câu truy vấn SQL để lấy thêm trường NgàyHen
+    $sql_xembaohanh = "SELECT bh.*, sp.TenSP, bh.NgayHen FROM bao_hanh bh 
                        JOIN san_pham sp ON bh.MaSP = sp.MaSP
                        WHERE bh.TrangThai = 0 
                        ORDER BY bh.NgayYeuCau ASC";
@@ -21,7 +21,7 @@
                         <th>STT</th>
                         <th>Khách hàng</th>
                         <th>Ngày yêu cầu</th>
-                        <th>Ngày Hẹn</th>
+                        <th>Ngày Hẹn</th> <!-- Cột "Ngày Hẹn" -->
                         <th>Sản phẩm</th>
                         <th>Vấn đề</th>
                         <th>Trạng thái</th>
@@ -37,6 +37,7 @@
                         <td><?php echo $stt++; ?></td>
                         <td><?php echo $data['TenDangNhap']; ?></td>
                         <td><?php echo $data['NgayYeuCau']; ?></td>
+                        <td><?php echo $data['NgayHen'] ? $data['NgayHen'] : 'Chưa có'; ?></td> <!-- Hiển thị Ngày Hẹn -->
                         <td><?php echo $data['TenSP']; ?></td> <!-- Hiển thị tên sản phẩm -->
                         <td><?php echo $data['LyDo']; ?></td>
                         <td>Chờ xử lý</td>

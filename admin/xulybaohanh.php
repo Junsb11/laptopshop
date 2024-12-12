@@ -35,18 +35,15 @@ if ($idbh) {
 
                 if ($stmt_update->execute()) {
                     // Thêm thông tin chi tiết bảo hành vào bảng chi_tiet_bao_hanh
-                    $sql_chitiet = "INSERT INTO chi_tiet_bao_hanh (MaBH, ChiTiet) VALUES (?, ?)";
+                    $sql_chitiet = "INSERT INTO chi_tiet_bao_hanh (MaBH,MoTaChiTiet) VALUES (?, ?)";
                     $stmt_chitiet = $conn->prepare($sql_chitiet);
                     $stmt_chitiet->bind_param("is", $idbh, $chiTiet);
                     $stmt_chitiet->execute();
 
                     // Gửi thông báo cho người dùng
-                    $thongBao = "Yêu cầu bảo hành #{$idbh} đã được xử lý. Ngày hẹn: {$ngayHen}.";
-                    $sql_thongbao = "INSERT INTO thong_bao (MaNguoiDung, NoiDung) VALUES (?, ?)";
+                    $sql_thongbao = "INSERT INTO thong_bao (TenDangNhap, NoiDung, NgayGui, TrangThai) VALUES (?, ?, NOW(), ?)";
                     $stmt_thongbao = $conn->prepare($sql_thongbao);
-                    $stmt_thongbao->bind_param("is", $data['MaNguoiDung'], $thongBao);
-                    $stmt_thongbao->execute();
-
+                    $stmt_thongbao->bind_param("ssi", $data['TenDangNhap'], $thongBao, $trangThai);
                     // Nếu thành công, chuyển hướng về danh sách yêu cầu bảo hành
                     header("Location: baohanhchoxuly.php");
                     exit();

@@ -32,6 +32,9 @@
                     <?php 
                         $stt = 1;
                         while ($data = mysqli_fetch_array($result_baohanh)) {                                      
+
+                            // Hiển thị trạng thái phù hợp
+                            $trangthai = $data['TrangThai'] == 0 ? 'Chờ xử lý' : 'Đã xử lý';
                     ?>
                     <tr class="odd gradeX">
                         <td><?php echo $stt++; ?></td>
@@ -40,7 +43,7 @@
                         <td><?php echo $data['NgayHen'] ? $data['NgayHen'] : 'Chưa có'; ?></td> <!-- Hiển thị Ngày Hẹn -->
                         <td><?php echo $data['TenSP']; ?></td> <!-- Hiển thị tên sản phẩm -->
                         <td><?php echo $data['LyDo']; ?></td>
-                        <td>Chờ xử lý</td>
+                        <td><?php echo $trangthai; ?></td> <!-- Hiển thị trạng thái -->
                         <td>
                             <a href="xulybaohanh.php?id=<?php echo $data['MaBH']; ?>">Xử lý</a> || 
                             <a href="huybaohanh.php?id=<?php echo $data['MaBH']; ?>">Hủy yêu cầu</a>

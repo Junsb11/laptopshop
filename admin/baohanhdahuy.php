@@ -7,7 +7,7 @@
     $sql_baohanhdahuy = "SELECT bh.*, sp.TenSP FROM bao_hanh bh 
                          JOIN san_pham sp ON bh.MaSP = sp.MaSP
                          WHERE bh.TrangThai = 2
-                         ORDER BY bh.NgayBH ASC";  // Ngày bảo hành để theo dõi các yêu cầu đã hủy
+                         ORDER BY bh.NgayYeuCau ASC";  // Ngày yêu cầu để theo dõi các yêu cầu đã hủy
 
     $result_baohanhdahuy = mysqli_query($conn, $sql_baohanhdahuy);
 ?>

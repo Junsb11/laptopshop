@@ -6,42 +6,62 @@ $idbh = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
 if ($idbh) {
     // Lấy thông tin bảo hành từ cơ sở dữ liệu
-    $sql_baohanh = "SELECT * FROM bao_hanh WHERE MaBH = ?";
+    $sql_baohanh = "SELECT bh.*, sp.TenSP FROM bao_hanh bh 
+                    JOIN san_pham sp ON bh.MaSP = sp.MaSP
+                    WHERE MaBH = ?";
     $stmt = $conn->prepare($sql_baohanh);
     $stmt->bind_param("i", $idbh);  // Liên kết tham số
     $stmt->execute();
     $result_baohanh = $stmt->get_result();
     $data = $result_baohanh->fetch_array();
 
-    // Xử lý form gửi lên
-    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        // Lấy mã nhân viên và ngày hẹn từ form
-        $maNV = filter_input(INPUT_POST, 'maNV', FILTER_VALIDATE_INT);
-        $ngayHen = filter_input(INPUT_POST, 'ngayHen', FILTER_SANITIZE_STRING);
+    if ($data) {
+        // Xử lý form gửi lên
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            // Lấy mã nhân viên, ngày hẹn và vấn đề chi tiết từ form
+            $maNV = filter_input(INPUT_POST, 'maNV', FILTER_VALIDATE_INT);
+            $ngayHen = filter_input(INPUT_POST, 'ngayHen', FILTER_SANITIZE_STRING);
+            $chiTiet = filter_input(INPUT_POST, 'chiTiet', FILTER_SANITIZE_STRING);
 
-        // Kiểm tra tính hợp lệ của ngày hẹn
-        $date_check = DateTime::createFromFormat('Y-m-d\TH:i', $ngayHen);
-        $is_valid_date = $date_check && $date_check->format('Y-m-d\TH:i') === $ngayHen;
+            // Kiểm tra tính hợp lệ của ngày hẹn
+            $date_check = DateTime::createFromFormat('Y-m-d\TH:i', $ngayHen);
+            $is_valid_date = $date_check && $date_check->format('Y-m-d\TH:i') === $ngayHen;
 
-        if ($maNV && $is_valid_date) {
-            // Cập nhật trạng thái yêu cầu bảo hành và thêm mã nhân viên và ngày hẹn
-            $sql_update = "UPDATE bao_hanh SET MaNV = ?, NgayHen = ?, TrangThai = 1 WHERE MaBH = ?";
-            $stmt_update = $conn->prepare($sql_update);
-            $stmt_update->bind_param("isi", $maNV, $ngayHen, $idbh);
+            if ($maNV && $is_valid_date && !empty($chiTiet)) {
+                // Cập nhật trạng thái yêu cầu bảo hành và thêm mã nhân viên, ngày hẹn và chi tiết
+                $sql_update = "UPDATE bao_hanh SET MaNV = ?, NgayHen = ?, TrangThai = 1 WHERE MaBH = ?";
+                $stmt_update = $conn->prepare($sql_update);
+                $stmt_update->bind_param("isi", $maNV, $ngayHen, $idbh);
 
-            if ($stmt_update->execute()) {
-                // Nếu thành công, chuyển hướng về danh sách yêu cầu bảo hành
-                header("Location: baohanhchoxuly.php");
-                exit();
+                if ($stmt_update->execute()) {
+                    // Thêm thông tin chi tiết bảo hành vào bảng chi_tiet_bao_hanh
+                    $sql_chitiet = "INSERT INTO chi_tiet_bao_hanh (MaBH, ChiTiet) VALUES (?, ?)";
+                    $stmt_chitiet = $conn->prepare($sql_chitiet);
+                    $stmt_chitiet->bind_param("is", $idbh, $chiTiet);
+                    $stmt_chitiet->execute();
+
+                    // Gửi thông báo cho người dùng
+                    $thongBao = "Yêu cầu bảo hành #{$idbh} đã được xử lý. Ngày hẹn: {$ngayHen}.";
+                    $sql_thongbao = "INSERT INTO thong_bao (MaNguoiDung, NoiDung) VALUES (?, ?)";
+                    $stmt_thongbao = $conn->prepare($sql_thongbao);
+                    $stmt_thongbao->bind_param("is", $data['MaNguoiDung'], $thongBao);
+                    $stmt_thongbao->execute();
+
+                    // Nếu thành công, chuyển hướng về danh sách yêu cầu bảo hành
+                    header("Location: baohanhchoxuly.php");
+                    exit();
+                } else {
+                    $error_message = "Cập nhật không thành công. Vui lòng thử lại.";
+                }
             } else {
-                $error_message = "Cập nhật không thành công.";
+                $error_message = "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại thông tin.";
             }
-        } else {
-            $error_message = "Dữ liệu không hợp lệ. Hãy kiểm tra lại.";
         }
+    } else {
+        $error_message = "Không tìm thấy yêu cầu bảo hành.";
     }
 } else {
-    echo "Mã bảo hành không hợp lệ.";
+    $error_message = "Mã bảo hành không hợp lệ.";
     exit();
 }
 ?>
@@ -83,7 +103,12 @@ if ($idbh) {
 
             <div class="mb-3">
                 <label for="ngayHen" class="form-label">Ngày hẹn:</label>
-                <input type="datetime-local" id="ngayHen" name="ngayHen" class="form-control" required>
+                <input type="datetime-local" id="ngayHen" name="ngayHen" class="form-control" value="" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="chiTiet" class="form-label">Chi tiết vấn đề:</label>
+                <textarea id="chiTiet" name="chiTiet" class="form-control" rows="3" required></textarea>
             </div>
 
             <button type="submit" class="btn btn-primary w-100">Xử lý</button>
@@ -91,6 +116,14 @@ if ($idbh) {
 
         <br>
         <a href="baohanhchoxuly.php" class="btn btn-secondary w-100">Quay lại danh sách yêu cầu bảo hành</a>
+
+        <h4 class="mt-5">Thông tin yêu cầu bảo hành:</h4>
+        <ul>
+            <li><strong>Mã yêu cầu bảo hành:</strong> <?php echo $data['MaBH']; ?></li>
+            <li><strong>Sản phẩm:</strong> <?php echo $data['TenSP']; ?></li>
+            <li><strong>Vấn đề:</strong> <?php echo $data['LyDo']; ?></li>
+            <li><strong>Ngày yêu cầu:</strong> <?php echo $data['NgayYeuCau']; ?></li>
+        </ul>
     </div>
 </body>
 </html>

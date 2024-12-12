@@ -117,6 +117,10 @@ $result_orders = $stmt_orders->get_result();
                             <label>Phụ kiện đi kèm (nếu có)</label>
                             <textarea class="form-control" name="txtaccessories" placeholder="Liệt kê các phụ kiện đi kèm với sản phẩm" rows="2"></textarea>
                         </div>
+                        <div class="form-group">
+                            <label>Ngày yêu Cầu</label>
+                            <input type="date" class="form-control" name="txtngayyeucau" value="<?php echo date('Y-m-d'); ?>" readonly>
+                            </div>
                     </div>
                     <div class="card-footer border-secondary bg-transparent">
                         <button class="btn btn-lg btn-block btn-primary font-weight-bold my-3 py-3" name="btnsubmit_warranty" <?php echo ($result_orders->num_rows == 0) ? 'disabled' : ''; ?>>Gửi yêu cầu bảo hành</button>

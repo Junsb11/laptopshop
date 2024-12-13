@@ -55,7 +55,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </tr>
                     <tr>
                         <td>Vai trò</td>
-                        <td><input type="text" name="VaiTro" placeholder="Nhập vai trò" required /></td>
+                        <td name="VaiTro"><select>
+                                <option value="quanly">Quản lý</option>
+                                <option value="kythuat">Kỹ Thuật</option>
+                                <option value="thukho">Thủ Kho</option>
+                            </select>
+                        </td>
                     </tr>
                     <tr>
                         <td>Số điện thoại</td>

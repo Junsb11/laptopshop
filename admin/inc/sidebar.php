@@ -30,7 +30,7 @@
                 <li><a class="menuitem">Quản lý tài khoản</a>
                     <ul class="submenu">
                         <li><a href="xemtaikhoan.php">Xem tài khoản</a></li> 
-                        <li><a href="themtaikhoan.php">Thêm tài khoản</a></li>   
+                        <li><a href="themmoitaikhoan.php">Thêm tài khoản</a></li>   
   
                     </ul>
                 </li>

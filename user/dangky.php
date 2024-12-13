@@ -83,10 +83,7 @@
             <input type="text" placeholder="Nhập SĐT..." name="SDT" id="SDT" required>
 
             <label for="DiaChi"><b>Địa chỉ</b></label>
-            <input type="text" placeholder="Nhập Đường/Thôn..." name="DuongThon" id="DuongThon" required>
-            <input type="text" placeholder="Nhập Phường/Xã..." name="PhuongXa" id="PhuongXa" required>
-            <input type="text" placeholder="Nhập Quận/Huyện..." name="QuanHuyen" id="QuanHuyen" required>
-            <input type="text" placeholder="Nhập Tỉnh/Thành Phố..." name="TinhTP" id="TinhTP" required>
+            <input type="text" placeholder="Nhập địa chỉ đầy đủ (Đường/Thôn, Phường/Xã, Quận/Huyện, Tỉnh/Thành Phố)" name="DiaChi" id="DiaChi" required>
 
             <label for="Email"><b>Email</b></label>
             <input type="text" placeholder="Nhập Email..." name="Email" id="Email" required>
@@ -161,16 +158,18 @@ if(isset($_POST['btn_dangky'])){
     $hoten = $_POST['HoTen'];
     $sdt = $_POST['SDT'];
     $email = $_POST['Email'];
-    $duongThon = $_POST['DuongThon'];
-    $phuongXa = $_POST['PhuongXa'];
-    $quanHuyen = $_POST['QuanHuyen'];
-    $tinhTP = $_POST['TinhTP'];
-    $diachi = $duongThon . ', ' . $phuongXa . ', ' . $quanHuyen . ', ' . $tinhTP;
+    $diachi = $_POST['DiaChi']; // Lấy từ form HTML
     $gt = $_POST['gt'];
     $mk = $_POST['MatKhau'];
     $nhaplaimk = $_POST['NhapLaiMK'];
 
-    // Validate server-side
+    // Validate Địa chỉ (nếu cần)
+    if(empty($diachi)) {
+        echo "<script>displayErrorMessage('Vui lòng nhập địa chỉ đầy đủ.');</script>";
+        return;
+    }
+
+    // Các bước kiểm tra khác (tên đăng nhập, số điện thoại, email, v.v.)
     if(strlen($tendn) < 3 || strlen($tendn) > 8) {
         echo "<script>displayErrorMessage('Tên đăng nhập phải từ 3 đến 8 kí tự.');</script>";
         return;
@@ -191,49 +190,47 @@ if(isset($_POST['btn_dangky'])){
         return;
     }
 
-        // Check if password meets the criteria
-        $passwordPattern = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/';
-        if(!preg_match($passwordPattern, $mk)) {
-            echo "<script>displayErrorMessage('Mật khẩu phải ít nhất 8 kí tự, bao gồm ít nhất một chữ thường, một chữ in hoa, một ký tự đặc biệt và một số.');</script>";
-            return;
-        }
-    
-        // Check if username already exists
-        $sql_dn = "SELECT * FROM tai_khoan WHERE TenDangNhap='$tendn'";
-        $result_dn = mysqli_query($conn, $sql_dn);
-        if(mysqli_num_rows($result_dn) > 0) {
-            echo "<script>displayErrorMessage('Tên đăng nhập đã tồn tại.');</script>";
-            return;
-        }
-    
-        // Check if phone number already exists
-        $sql_sdt = "SELECT * FROM tai_khoan WHERE SDT='$sdt'";
-        $result_sdt = mysqli_query($conn, $sql_sdt);
-        if(mysqli_num_rows($result_sdt) > 0) {
-            echo "<script>displayErrorMessage('Số điện thoại đã tồn tại.');</script>";
-            return;
-        }
-    
-        // Check if email already exists
-        $sql_email = "SELECT * FROM tai_khoan WHERE Email='$email'";
-        $result_email = mysqli_query($conn, $sql_email);
-        if(mysqli_num_rows($result_email) > 0) {
-            echo "<script>displayErrorMessage('Email đã tồn tại.');</script>";
-            return;
-        }
-    
-        $sql_insert = "INSERT INTO tai_khoan (TenDangNhap, MatKhau, HoTen, GioiTinh, SDT, Email, DiaChi, MaLoai, TrangThai)
-                       VALUES ('$tendn', '$mk', '$hoten', '$gt', '$sdt', '$email', '$diachi', 1, 1)";
-        $result_insert = mysqli_query($conn, $sql_insert);
-    
-        if($result_insert) {
-            echo "<script>displayErrorMessage('Đăng kí thành công.');</script>";
-            echo "<script>window.location.href='dangnhap.php';</script>";
-        } else {
-            echo "<script>displayErrorMessage('Có lỗi xảy ra. Vui lòng thử lại.');</script>";
-        }
+    $passwordPattern = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/';
+    if(!preg_match($passwordPattern, $mk)) {
+        echo "<script>displayErrorMessage('Mật khẩu phải ít nhất 8 kí tự, bao gồm ít nhất một chữ thường, một chữ in hoa, một ký tự đặc biệt và một số.');</script>";
+        return;
     }
-    ?>
-    
-    <?php include "./inc/footer.php"; ?>
-    
+
+    // Check if username already exists
+    $sql_dn = "SELECT * FROM tai_khoan WHERE TenDangNhap='$tendn'";
+    $result_dn = mysqli_query($conn, $sql_dn);
+    if(mysqli_num_rows($result_dn) > 0) {
+        echo "<script>displayErrorMessage('Tên đăng nhập đã tồn tại.');</script>";
+        return;
+    }
+
+    // Check if phone number already exists
+    $sql_sdt = "SELECT * FROM tai_khoan WHERE SDT='$sdt'";
+    $result_sdt = mysqli_query($conn, $sql_sdt);
+    if(mysqli_num_rows($result_sdt) > 0) {
+        echo "<script>displayErrorMessage('Số điện thoại đã tồn tại.');</script>";
+        return;
+    }
+
+    // Check if email already exists
+    $sql_email = "SELECT * FROM tai_khoan WHERE Email='$email'";
+    $result_email = mysqli_query($conn, $sql_email);
+    if(mysqli_num_rows($result_email) > 0) {
+        echo "<script>displayErrorMessage('Email đã tồn tại.');</script>";
+        return;
+    }
+
+    $sql_insert = "INSERT INTO tai_khoan (TenDangNhap, MatKhau, HoTen, GioiTinh, SDT, Email, DiaChi, MaLoai, TrangThai)
+                   VALUES ('$tendn', '$mk', '$hoten', '$gt', '$sdt', '$email', '$diachi', 1, 1)";
+    $result_insert = mysqli_query($conn, $sql_insert);
+
+    if($result_insert) {
+        echo "<script>alert('Đăng kí thành công.');</script>";
+        echo "<script>window.location.href='dangnhap.php';</script>";
+    } else {
+        echo "<script>displayErrorMessage('Có lỗi xảy ra. Vui lòng thử lại.');</script>";
+    }
+}
+?>
+
+<?php include "./inc/footer.php"; ?>

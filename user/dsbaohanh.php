@@ -143,13 +143,15 @@ $count_dahuy = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM bao_hanh WHERE
                                         </td>
                                         <td>
                                             <a href="chitietbaohanh.php?mabh=<?php echo $data['MaBH']; ?>" class="btn btn-primary btn-sm btn-block">Chi tiết</a>
-                                            <?php if ($data['TrangThai'] == 0) { ?>
+                                        <?php if ($data['TrangThai'] == 0) { ?>
                                                 <a href="huybaohanh.php?mabh=<?php echo $data['MaBH']; ?>" class="btn btn-danger btn-sm btn-block" onclick="return confirm('Bạn có chắc chắn muốn hủy yêu cầu này không?');">Hủy</a>
-                                            <?php } elseif ($data['TrangThai'] == 2) { ?>
+                                        <?php } elseif ($data['TrangThai'] == 2) { ?>
                                                 <a href="xoabaohanh.php?mabh=<?php echo $data['MaBH']; ?>" class="btn btn-danger btn-sm btn-block" onclick="return confirm('Bạn có chắc chắn muốn xóa yêu cầu này không?');">Xóa</a>
-                                            <?php } ?>
+                                        <?php } elseif ($data['TrangThai'] == 3) { ?>
+                                            <a href="khoiphucbaohanh.php?mabh=<?php echo $data['MaBH']; ?>" class="btn btn-success btn-sm btn-block" onclick="return confirm('Bạn có chắc chắn muốn khôi phục yêu cầu này không?');">Khôi phục</a>
+                                        <?php } ?>
                                         </td>
-                                    </tr>
+   </tr>
                                 <?php } ?>
                                 <?php if (mysqli_num_rows($result_bh) == 0) { ?>
                                     <tr>

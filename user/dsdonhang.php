@@ -152,6 +152,8 @@ $count_dahuy = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM hoa_don WHERE 
                                                 <a href="huydonhang.php?mabh=<?php echo $data['MaHD']; ?>" class="btn btn-danger btn-sm btn-block" onclick="return confirm('Bạn có chắc chắn muốn hủy yêu cầu này không?');">Hủy</a>
                                             <?php } elseif ($data['TrangThai'] == 2) { ?>
                                                 <a href="xoadonhang.php?mabh=<?php echo $data['MaHD']; ?>" class="btn btn-danger btn-sm btn-block" onclick="return confirm('Bạn có chắc chắn muốn xóa yêu cầu này không?');">Xóa</a>
+                                            <?php } elseif ($data['TrangThai'] == 3) { ?>
+                                                <a href="khoiphucdonhang.php?mahd=<?php echo $data['MaHD']; ?>" class="btn btn-warning btn-sm btn-block" onclick="return confirm('Bạn có chắc chắn muốn khôi phục đơn hàng này không?');">Khôi phục</a>
                                             <?php } ?>
                                         </td>
                                     </tr>

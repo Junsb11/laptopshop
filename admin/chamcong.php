@@ -3,11 +3,13 @@
 <?php
     include 'connect.php';
 
-    // Fetch attendance data with pagination
-    $limit = 10; // Records per page
+    // Records per page
+    $limit = 10; 
+    // Get the current page
     $page = isset($_GET['page']) && is_numeric($_GET['page']) ? intval($_GET['page']) : 1;
     $offset = ($page - 1) * $limit;
 
+    // Fetch attendance data with pagination
     $sql_chamcong = "SELECT MaChamCong, MaNV, Ngay, SoGio, TrangThai FROM ChamCong LIMIT ?, ?";
     $stmt = $conn->prepare($sql_chamcong);
     $stmt->bind_param("ii", $offset, $limit);
@@ -17,7 +19,14 @@
     if (!$result_cc) {
         die("Error fetching attendance data: " . $stmt->error);
     }
+
+    // Get the total number of records for pagination
+    $sql_total = "SELECT COUNT(*) AS total FROM ChamCong";
+    $result_total = $conn->query($sql_total);
+    $total_records = $result_total->fetch_assoc()['total'];
+    $total_pages = ceil($total_records / $limit);
 ?>
+
 <div class="grid_10">
     <div class="box round first grid">
         <h2>Chấm công nhân viên</h2>
@@ -51,13 +60,31 @@
                 <?php } ?>
                 </tbody>
             </table>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <?php if ($page > 1): ?>
+                    <a href="chamcong.php?page=<?php echo $page - 1; ?>" class="prev">« Previous</a>
+                <?php endif; ?>
+
+                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                    <a href="chamcong.php?page=<?php echo $i; ?>" class="<?php echo ($i == $page) ? 'active' : ''; ?>"><?php echo $i; ?></a>
+                <?php endfor; ?>
+
+                <?php if ($page < $total_pages): ?>
+                    <a href="chamcong.php?page=<?php echo $page + 1; ?>" class="next">Next »</a>
+                <?php endif; ?>
+            </div>
+
             <a href="themmoi_chamcong.php" class="btn btn-primary">Thêm mới</a>
         </div>
     </div>
 </div>
+
 <script>
     $(document).ready(function () {
         $('.datatable').dataTable();
     });
 </script>
+
 <?php include 'inc/footer.php'; ?>

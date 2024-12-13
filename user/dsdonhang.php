@@ -1,5 +1,7 @@
 <?php
 include "../admin/connect.php";
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
 // Bắt đầu session nếu chưa tồn tại
 if (!isset($_SESSION)) {
@@ -18,6 +20,7 @@ $tendn = $_SESSION['tendn'];
 // Xử lý biến loại để lấy danh sách đơn hàng tương ứng
 $loai = isset($_GET['loai']) ? $_GET['loai'] : 'choxacnhan';
 
+// Quyết định trạng thái và tiêu đề dựa vào tham số 'loai'
 switch ($loai) {
     case 'choxacnhan':
         $l = 0;
@@ -55,75 +58,43 @@ $count_dahuy = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM hoa_don WHERE 
 <?php include "./inc/header.php"; ?>
 <?php include "./inc/navbar.php"; ?>
 
-<style>
-    .fixed-sidebar {
-        position: fixed;
-        top: 200px;
-        width: 350px;
-    }
-
-    .content {
-        margin-left: 350px;
-        margin-bottom: 180px;
-    }
-
-    .btn-xacnhan {
-        background-color: #28a745;
-        color: white;
-        border-radius: 5px;
-        padding: 5px 10px;
-        font-size: 12px;
-        font-weight: bold;
-        transition: all 0.3s ease;
-    }
-
-    .btn-xacnhan:hover {
-        background-color: #218838;
-        transform: scale(1.05);
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .btn-xacnhan:active {
-        background-color: #1e7e34;
-        transform: scale(1);
-    }
-
-    .btn-xacnhan i {
-        margin-right: 5px;
-    }
-</style>
-
 <div class="container mt-5">
     <div class="row">
-        <div class="col-lg- fixed-sidebar">
+        <!-- Sidebar -->
+        <div class="col-lg-3 fixed-sidebar">
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title">Tình trạng đơn hàng</h4>
                     <ul class="list-group">
                         <li class="list-group-item d-flex justify-content-between align-items-center <?php echo ($loai == 'choxacnhan') ? 'active' : ''; ?>">
-                            <a href="dsdonhang.php?loai=choxacnhan">Đơn hàng chờ xác nhận</a>
-                            <span class="badge badge-primary badge-pill"><?php echo $count_choxacnhan; ?></span>
+                            <a href="dsdonhang.php?loai=choxacnhan">Chờ xác nhận</a>
+                            <span class="badge badge-primary"><?php echo $count_choxacnhan; ?></span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center <?php echo ($loai == 'danggiao') ? 'active' : ''; ?>">
-                            <a href="dsdonhang.php?loai=danggiao">Đơn hàng đang giao</a>
-                            <span class="badge badge-primary badge-pill"><?php echo $count_danggiao; ?></span>
+                            <a href="dsdonhang.php?loai=danggiao">Đang giao</a>
+                            <span class="badge badge-primary"><?php echo $count_danggiao; ?></span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center <?php echo ($loai == 'dagiao') ? 'active' : ''; ?>">
-                            <a href="dsdonhang.php?loai=dagiao">Đơn hàng đã giao</a>
-                            <span class="badge badge-primary badge-pill"><?php echo $count_dagiao; ?></span>
+                            <a href="dsdonhang.php?loai=dagiao">Đã giao</a>
+                            <span class="badge badge-primary"><?php echo $count_dagiao; ?></span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center <?php echo ($loai == 'dahuy') ? 'active' : ''; ?>">
-                            <a href="dsdonhang.php?loai=dahuy">Đơn hàng đã hủy</a>
-                            <span class="badge badge-primary badge-pill"><?php echo $count_dahuy; ?></span>
+                            <a href="dsdonhang.php?loai=dahuy">Đã hủy</a>
+                            <span class="badge badge-primary"><?php echo $count_dahuy; ?></span>
                         </li>
                     </ul>
                 </div>
             </div>
         </div>
+
+        <!-- Nội dung chính -->
         <div class="col-lg-9 content">
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title"><?php echo $title; ?></h4>
+                    <?php if (isset($_GET['msg'])) { ?>
+                        <div class="alert alert-info text-center"><?php echo htmlspecialchars($_GET['msg']); ?></div>
+                    <?php } ?>
                     <div class="table-responsive">
                         <table class="table table-bordered">
                             <thead class="thead-light">
@@ -141,7 +112,8 @@ $count_dahuy = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM hoa_don WHERE 
                             <tbody>
                                 <?php
                                 $stt = 1;
-                                while ($data = mysqli_fetch_array($result_hd)) { ?>
+                                while ($data = mysqli_fetch_array($result_hd)) {
+                                ?>
                                     <tr>
                                         <td><?php echo $stt++; ?></td>
                                         <td>HD<?php echo $data['MaHD']; ?></td>
@@ -166,13 +138,12 @@ $count_dahuy = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM hoa_don WHERE 
                                                     break;
                                                 default:
                                                     echo "Không xác định";
-                                                    break;
                                             }
                                             ?>
                                         </td>
                                         <td>
                                             <?php if ($data['TrangThai'] == 1) { ?>
-                                                <a href="xacnhandonhang.php?mahd=<?php echo $data['MaHD']; ?>" class="btn btn-xacnhan">
+                                                <a href="xacnhandonhang.php?mahd=<?php echo $data['MaHD']; ?>" class="btn btn-success btn-sm btn-block">
                                                     <i class="fas fa-check-circle"></i> Xác nhận
                                                 </a>
                                             <?php } ?>
@@ -185,7 +156,6 @@ $count_dahuy = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM hoa_don WHERE 
                                         </td>
                                     </tr>
                                 <?php } ?>
-
                                 <?php if (mysqli_num_rows($result_hd) == 0) { ?>
                                     <tr>
                                         <td colspan="8" class="text-center">Không có đơn hàng nào.</td>

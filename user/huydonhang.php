@@ -1,38 +1,39 @@
 <?php
 include "../admin/connect.php";
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
 
+// Bắt đầu session nếu chưa tồn tại
 if (!isset($_SESSION)) {
     session_start();
 }
 
-// Kiểm tra người dùng đã đăng nhập chưa
+// Kiểm tra xem người dùng đã đăng nhập chưa, nếu chưa thì chuyển hướng về trang đăng nhập
 if (!isset($_SESSION['tendn'])) {
     header("Location: dangnhap.php");
-    exit();
+    exit(); // Thoát khỏi script sau khi chuyển hướng
 }
 
-if (isset($_GET['madh'])) {
-    $madh = mysqli_real_escape_string($conn, $_GET['madh']);
-    $tendn = $_SESSION['tendn'];
+// Lấy tên đăng nhập từ session
+$tendn = $_SESSION['tendn'];
 
-    // Kiểm tra xem đơn hàng thuộc quyền của người dùng và đang chờ xử lý
-    $query = "SELECT * FROM don_hang WHERE MaDH='$madh' AND TenDangNhap='$tendn' AND TrangThai=0";
+if (isset($_GET['mabh'])) {
+    $mabh = mysqli_real_escape_string($conn, $_GET['mabh']);
+
+    // Kiểm tra xem yêu cầu hủy có hợp lệ
+    $query = "SELECT * FROM hoa_don WHERE MaHD='$mabh' AND TenDangNhap='$tendn' AND TrangThai=0";
     $result = mysqli_query($conn, $query);
 
     if (mysqli_num_rows($result) > 0) {
         // Cập nhật trạng thái thành "Đã hủy" (TrangThai = 3)
-        $update = "UPDATE hoa_don SET TrangThai=3 WHERE MaHD='$madh'";
+        $update = "UPDATE hoa_don SET TrangThai=3 WHERE MaHD='$mabh'";
         if (mysqli_query($conn, $update)) {
-            header("Location: dsdonhang.php?loai=choxuly&msg=Hủy đơn hàng thành công!");
+            header("Location: dsdonhang.php?loai=choxacnhan&msg=Hủy yêu cầu thành công!");
         } else {
-            header("Location: dsdonhang.php?loai=choxuly&msg=Hủy đơn hàng thất bại!");
+            header("Location: dsdonhang.php?loai=choxacnhan&msg=Hủy yêu cầu thất bại!");
         }
     } else {
-        header("Location: dsdonhang.php?loai=choxuly&msg=Đơn hàng không hợp lệ!");
+        header("Location: dsdonhang.php?loai=choxacnhan&msg=Yêu cầu không hợp lệ hoặc không tìm thấy đơn hàng!");
     }
 } else {
-    header("Location: dsdonhang.php?loai=choxuly&msg=Không tìm thấy đơn hàng!");
+    header("Location: dsdonhang.php?loai=choxacnhan&msg=Không tìm thấy yêu cầu!");
 }
 ?>

@@ -27,12 +27,6 @@
                         <li><a href="donhangdahuy.php">Đơn đã hủy</a> </li>
                     </ul>
                 </li>
-                <li><a class="menuitem">Thống kê</a>
-                    <ul class="submenu">
-                        <li><a href="thongkesp.php">Thống kê doanh thu</a> </li>
-                        <li><a href="thongkekh.php">Khách hàng thân thiết</a> </li>
-                    </ul>
-                </li>
                 <li><a class="menuitem">Quản lý tài khoản</a>
                     <ul class="submenu">
                         <li><a href="xemtaikhoan.php">Xem tài khoản</a></li> 
@@ -55,6 +49,12 @@
                         <li><a href="baohanhdangxuly.php">Đơn đang xử lý</a> </li>
                         <li><a href="baohanhdaxuly.php">Đơn đã hoàn tất</a> </li>
                         <li><a href="baohanhdahuy.php">Đơn đã hủy</a> </li>
+                    </ul>
+                </li>
+                <li><a class="menuitem">Thống kê</a>
+                    <ul class="submenu">
+                        <li><a href="thongkesp.php">Thống kê doanh thu</a> </li>
+                        <li><a href="thongkekh.php">Khách hàng thân thiết</a> </li>
                     </ul>
                 </li>
             </ul>

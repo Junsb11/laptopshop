@@ -1,13 +1,15 @@
 <?php
-    include 'inc/header.php';
-    include 'inc/sidebar.php';
-    include 'connect.php';
+include 'inc/header.php';
+include 'inc/sidebar.php';
+include 'connect.php';
 
-    $sql_xemkm = "SELECT km.MaKM, km.TenKM, km.TuNgay, km.DenNgay, km.TrangThai, 
-                         ctkm.MaSP, ctkm.TyLeKM, ctkm.GhiChu, ctkm.SoLuong
-                  FROM khuyen_mai km
-                  LEFT JOIN CT_khuyen_mai ctkm ON km.MaKM = ctkm.MaKM";
-    $result_dm = mysqli_query($conn, $sql_xemkm);
+$sql_xemkm = "SELECT km.MaKM, km.TenKM, km.TuNgay, km.DenNgay, km.TrangThai, 
+                     ctkm.MaSP, ctkm.TyLeKM, ctkm.GhiChu, ctkm.SoLuong
+              FROM khuyen_mai km
+              LEFT JOIN chi_tiet_khuyen_mai ctkm ON km.MaKM = ctkm.MaKM";
+
+$result_dm = mysqli_query($conn, $sql_xemkm);
+
 ?>
 <div class="grid_10">
     <div class="box round first grid">
@@ -32,7 +34,7 @@
                     <tbody>
                     <?php 
                         $stt = 1;
-                        while ($data = mysqli_fetch_array($result_dm)) {									
+                        while ($data = mysqli_fetch_array($result_dm)) {										
                     ?>
                         <tr class="odd gradeX">
                             <td><?php echo $stt++;?></td>

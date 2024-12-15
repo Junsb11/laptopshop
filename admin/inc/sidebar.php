@@ -51,6 +51,12 @@
                         <li><a href="baohanhdahuy.php">Đơn đã hủy</a> </li>
                     </ul>
                 </li>
+                <li><a class="menuitem">Quản lý khuyến mãi</a>
+                    <ul class="submenu">
+                        <li><a href="xemkhuyenmai.php">Xem khuyến mãi</a> </li>
+                        <li><a href="themmoikhuyenmai.php">Thêm mới khuyến mãi</a> </li>
+                    </ul>
+                </li>
                 <li><a class="menuitem">Thống kê</a>
                     <ul class="submenu">
                         <li><a href="thongkesp.php">Thống kê doanh thu</a> </li>

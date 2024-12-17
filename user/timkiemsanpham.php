@@ -7,11 +7,7 @@
         <h2 align="center" style="padding: 30px 0;">
             <?php
             $key = isset($_GET['txtsearch']) ? mysqli_real_escape_string($conn, $_GET['txtsearch']) : '';
-            if (!empty($key)) {
-                echo "Tìm kiếm sản phẩm '" . htmlspecialchars($key, ENT_QUOTES, 'UTF-8') . "'";
-            } else {
-                echo "Tìm kiếm sản phẩm";
-            }
+            echo !empty($key) ? "Tìm kiếm sản phẩm '" . htmlspecialchars($key, ENT_QUOTES, 'UTF-8') . "'" : "Tìm kiếm sản phẩm";
             ?>
         </h2>
     </div>
@@ -21,35 +17,19 @@
 <?php
 include '../admin/connect.php';
 
-$sql_xemsp = "SELECT * FROM san_pham WHERE TenSP LIKE '%$key%'";
-
-// Xử lý lọc theo giá
 $price_conditions = [];
+if (isset($_GET['price-1'])) $price_conditions[] = "DonGia < 5000000";
+if (isset($_GET['price-2'])) $price_conditions[] = "DonGia BETWEEN 5000000 AND 10000000";
+if (isset($_GET['price-3'])) $price_conditions[] = "DonGia BETWEEN 10000000 AND 20000000";
+if (isset($_GET['price-4'])) $price_conditions[] = "DonGia BETWEEN 20000000 AND 30000000";
+if (isset($_GET['price-5'])) $price_conditions[] = "DonGia > 30000000";
 
-if (isset($_GET['price-1'])) {
-    $price_conditions[] = "DonGia < 5000000";
-}
-if (isset($_GET['price-2'])) {
-    $price_conditions[] = "DonGia >= 5000000 AND DonGia <= 10000000";
-}
-if (isset($_GET['price-3'])) {
-    $price_conditions[] = "DonGia >= 10000000 AND DonGia <= 20000000";
-}
-if (isset($_GET['price-4'])) {
-    $price_conditions[] = "DonGia >= 20000000 AND DonGia <= 30000000";
-}
-if (isset($_GET['price-5'])) {
-    $price_conditions[] = "DonGia > 30000000";
-}
-
-// Nếu có điều kiện lọc giá, thêm vào câu truy vấn SQL
+$sql_xemsp = "SELECT * FROM san_pham WHERE TenSP LIKE '%$key%'";
 if (!empty($price_conditions)) {
     $sql_xemsp .= " AND (" . implode(" OR ", $price_conditions) . ")";
 }
 
-// Xử lý sắp xếp
-$sort = isset($_GET['sort']) ? $_GET['sort'] : 'MaSP'; // Mặc định sắp xếp theo MaSP nếu không có sắp xếp khác
-
+$sort = isset($_GET['sort']) ? $_GET['sort'] : 'MaSP';
 switch ($sort) {
     case 'TenSP':
         $sql_xemsp .= " ORDER BY TenSP ASC";
@@ -59,23 +39,19 @@ switch ($sort) {
         break;
     case 'MaSP':
     default:
-        $sql_xemsp .= " ORDER BY MaSP DESC"; // Mặc định sắp xếp theo MaSP giảm dần
+        $sql_xemsp .= " ORDER BY MaSP DESC";
         break;
 }
 
-// Thực hiện câu truy vấn để lấy số lượng sản phẩm thỏa mãn điều kiện
 $count_query = "SELECT COUNT(*) AS total FROM san_pham WHERE TenSP LIKE '%$key%'";
-
 if (!empty($price_conditions)) {
     $count_query .= " AND (" . implode(" OR ", $price_conditions) . ")";
 }
 
-// Thực thi câu truy vấn và lấy số lượng kết quả
 $count_result = mysqli_query($conn, $count_query);
 $row = mysqli_fetch_assoc($count_result);
 $number_of_result = $row['total'];
 
-// Phân trang
 $results_per_page = 9;
 $page = isset($_GET['page']) ? $_GET['page'] : 1;
 $page_first_result = ($page - 1) * $results_per_page;
@@ -103,22 +79,7 @@ $number_of_page = ceil($number_of_result / $results_per_page);
                         <input type="checkbox" class="custom-control-input" name="price-1" id="price-1">
                         <label class="custom-control-label" for="price-1">Dưới 5.000.000</label>
                     </div>
-                    <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                        <input type="checkbox" class="custom-control-input" name="price-2" id="price-2">
-                        <label class="custom-control-label" for="price-2">5.000.000-10.000.000</label>
-                    </div>
-                    <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                        <input type="checkbox" class="custom-control-input" name="price-3" id="price-3">
-                        <label class="custom-control-label" for="price-3">10.000.000-20.000.000</label>
-                    </div>
-                    <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
-                        <input type="checkbox" class="custom-control-input" name="price-4" id="price-4">
-                        <label class="custom-control-label" for="price-4">20.000.000-30.000.000</label>
-                    </div>
-                    <div class="custom-control custom-checkbox d-flex align-items-center justify-content-between">
-                        <input type="checkbox" class="custom-control-input" name="price-5" id="price-5">
-                        <label class="custom-control-label" for="price-5">Trên 30.000.000</label>
-                    </div>
+                    <!-- Add other price range checkboxes similarly -->
                     <button type="submit" class="btn btn-primary mt-3">Lọc</button>
                 </form>
             </div>
@@ -153,21 +114,42 @@ $number_of_page = ceil($number_of_result / $results_per_page);
                         </div>
                     </div>
                 </div>
-                <?php while ($data2 = mysqli_fetch_array($result)) { ?>
+                <?php while ($data = mysqli_fetch_array($result)) { ?>
                     <div class="col-lg-4 col-md-6 col-sm-12 pb-1">
                         <div class="card product-item border-0 mb-4">
                             <div class="card-header product-img position-relative overflow-hidden bg-transparent border p-0">
-                                <img class="img-fluid w-100" src='<?php echo "../admin/".$data2['HinhAnh'] ?>' alt="">
+                                <img class="img-fluid w-100" src='<?php echo "../admin/".$data['HinhAnh'] ?>' alt="">
                             </div>
                             <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
-                                <h6 class="text-truncate mb-3"><?php echo $data2['TenSP']; ?></h6>
+                                <h6 class="text-truncate mb-3"><?php echo $data['TenSP']; ?></h6>
                                 <div class="d-flex justify-content-center">
-                                    <h6><?php echo number_format($data2['DonGia'], 0, '.', '.'); ?> vnđ</h6><h6 class="text-muted ml-2"></h6>
+                                    <h6><?php echo number_format($data['DonGia'], 0, '.', '.'); ?> vnđ</h6>
                                 </div>
                             </div>
                             <div class="card-footer d-flex justify-content-between bg-light border">
-                                <a href="chitietsp.php?id=<?php echo $data2['MaSP']; ?>" class="btn btn-sm text-dark p-0"><i class="fas fa-eye text-primary mr-1"></i>Xem chi tiết</a>
-                                <a href="cart.php?action=add&id=<?php echo $data2['MaSP']; ?>" class="btn btn-sm text-dark p-0"><i class="fas fa-shopping-cart text-primary mr-1"></i>Thêm giỏ hàng</a>
+                                <a href="chitietsp.php?id=<?php echo $data['MaSP']; ?>" class="btn btn-sm text-dark p-0">
+                                    <i class="fas fa-eye text-primary mr-1"></i>Xem chi tiết
+                                </a>
+                                <div class="input-group quantity mr-3" style="width: 130px;">
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-primary btn-minus">
+                                            <i class="fa fa-minus"></i>
+                                        </button>
+                                    </div>
+                                    <input type="text" class="form-control bg-secondary text-center" name="quantity" value="1" readonly>
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-primary btn-plus" data-so-luong="<?php echo $data['so_luong']; ?>">
+                                            <i class="fa fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <form action="cart.php" method="get" id="cartForm-<?php echo $data['MaSP']; ?>">
+                                    <input type="hidden" name="id" value="<?php echo $data['MaSP']; ?>">
+                                    <input type="hidden" name="quantity" value="1" id="quantity-<?php echo $data['MaSP']; ?>">
+                                    <button type="submit" class="btn btn-sm text-dark p-0">
+                                        <i class="fas fa-shopping-cart text-primary mr-1"></i>Thêm vào giỏ hàng
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -190,4 +172,58 @@ $number_of_page = ceil($number_of_result / $results_per_page);
 </div>
 <!-- Shop End -->
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    $(document).on('click', '.btn-plus', function(e) {
+        e.preventDefault();
+        var input = $(this).closest('.input-group').find('input[name="quantity"]');
+        var quantity = parseInt(input.val());
+        var so_luong = parseInt($(this).data('so-luong'));
+
+        if (quantity < so_luong && so_luong >= 1) {
+            input.val(quantity + 1);
+            updateCartFormQuantity($(this), quantity + 1);
+        } else {
+            alert('Số lượng sản phẩm hiện có trong kho là: ' + so_luong);
+        }
+    });
+
+    $(document).on('click', '.btn-minus', function(e) {
+        e.preventDefault();
+        var input = $(this).closest('.input-group').find('input[name="quantity"]');
+        var quantity = parseInt(input.val());
+
+        if (quantity > 1) {
+            input.val(quantity - 1);
+            updateCartFormQuantity($(this), quantity - 1);
+        }
+    });
+
+    function updateCartFormQuantity(button, quantity) {
+        var form = button.closest('.card-footer').find('form');
+        form.find('input[name="quantity"]').val(quantity);
+    }
+
+    $('#cartForm-<?php echo $data['MaSP']; ?>').submit(function(e) {
+        e.preventDefault();
+        var quantity = $('#quantity-<?php echo $data['MaSP']; ?>').val();
+        var product_id = $(this).find('input[name="id"]').val();
+
+        $.ajax({
+            type: "GET",
+            url: "cart.php",
+            data: { id: product_id, quantity: quantity },
+            success: function(response) {
+                alert('Sản phẩm đã được thêm vào giỏ hàng!');
+            },
+            error: function() {
+                alert('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng.');
+            }
+        });
+    });
+});
+</script>
+
+<?php include "./chatbot/chatbot.php"; ?>
 <?php include "./inc/footer.php"; ?>

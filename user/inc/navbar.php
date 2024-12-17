@@ -11,8 +11,6 @@
         include '../admin/connect.php';
         $sql_xemdm="SELECT * FROM danh_muc where TrangThai=1";
         $result_dm=mysqli_query($conn,$sql_xemdm);
-        
-             
         ?>
     <div class="container-fluid">
         <div class="row border-top px-xl-5">
@@ -60,8 +58,8 @@
                                     <a href="thaydoimatkhau.php" class="dropdown-item">Thay đổi mật khẩu</a>
                                 </div>
                             </div>
-                            <a href="dsdonhang.php" class="nav-item nav-link">Quản lý lịch sử đơn hàng</a>
-                            <a href="dsbaohanh.php" class="nav-item nav-link">Quản lý lịch sử bảo hành`</a>
+                            <a href="dsdonhang.php" class="nav-item nav-link">Lịch sử đơn hàng</a>
+                            <a href="dsbaohanh.php" class="nav-item nav-link">Lịch sử bảo hành`</a>
                         </div>
                         
                         <div class="navbar-nav ml-auto py-0">

@@ -33,8 +33,8 @@ if (isset($bttt)) {
         exit;
     }
 
-    // Begin Transaction
-    mysqli_begin_transaction($conn);
+    // Bắt đầu transaction
+    mysqli_autocommit($conn, false);
 
     try {
         // Thêm thông tin vào bảng hoa_don
@@ -98,7 +98,7 @@ if (isset($bttt)) {
         unset($_SESSION['cart']);
     } catch (Exception $e) {
         // Rollback transaction nếu có lỗi
-        mysqli_roll_back($conn);
+        mysqli_rollback($conn);
         echo "Đặt hàng không thành công. Lỗi: " . $e->getMessage();
         exit;
     }
@@ -125,7 +125,6 @@ if (isset($bttt)) {
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
         }
 
         .container {
@@ -139,18 +138,6 @@ if (isset($bttt)) {
             animation: fadeIn 0.5s ease-in-out;
         }
 
-        /* Add fade-in effect */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         .success-icon {
             width: 120px;
             height: 120px;
@@ -159,18 +146,6 @@ if (isset($bttt)) {
             background-position: center;
             border-radius: 50%;
             margin: 0 auto 20px auto;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-            animation: bounce 1.5s infinite;
-        }
-
-        /* Add bounce animation */
-        @keyframes bounce {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
         }
 
         h2 {
@@ -193,38 +168,10 @@ if (isset($bttt)) {
             font-size: 16px;
             text-decoration: none;
             border-radius: 30px;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         .home-link:hover {
             background-color: #45a049;
-            transform: translateY(-3px);
-        }
-
-        .home-link:active {
-            background-color: #388e3c;
-            transform: translateY(1px);
-        }
-
-        .home-link:focus {
-            outline: none;
-        }
-
-        /* Add responsive design */
-        @media (max-width: 600px) {
-            .container {
-                padding: 30px;
-            }
-
-            h2 {
-                font-size: 20px;
-            }
-
-            .home-link {
-                font-size: 14px;
-                padding: 10px 20px;
-            }
         }
     </style>
 </head>

@@ -38,9 +38,6 @@
                     <ul class="submenu">
                         <li><a href="xemnhanvien.php">Xem nhân viên</a></li>
                         <li><a href="themmoinhanvien.php">Thêm nhân viên</a></li>
-                        <li><a href="chamcong.php">Chấm công nhân viên</a></li>
-                        <li><a href="checkin_checkout.php">Check-in/Check-out</a></li>  <!-- Thêm mục này -->
-                        <li><a href="quanlyquyen.php">Quản lý quyền hạn</a></li>  <!-- Thêm mục này -->
                     </ul>
                 </li>
                 <li><a class="menuitem">Quản lý bảo hành</a>

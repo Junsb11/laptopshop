@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $diaChi = mysqli_real_escape_string($conn, $_POST['DiaChi']);
     $ngayVaoLam = mysqli_real_escape_string($conn, $_POST['NgayVaoLam']);
     $luongCB = mysqli_real_escape_string($conn, $_POST['LuongCB']);
-    $vaiTro = mysqli_real_escape_string($conn, $_POST['VaiTro']);
+    $vaiTro = isset($_POST['VaiTro']) ? mysqli_real_escape_string($conn, $_POST['VaiTro']) : '';
     $sdt = mysqli_real_escape_string($conn, $_POST['SDT']);
     $email = mysqli_real_escape_string($conn, $_POST['Email']);
     $trangThai = mysqli_real_escape_string($conn, $_POST['TrangThai']);
@@ -55,7 +55,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </tr>
                     <tr>
                         <td>Vai trò</td>
-                        <td name="VaiTro"><select>
+                        <td>
+                            <select name="VaiTro" required>
                                 <option value="quanly">Quản lý</option>
                                 <option value="kythuat">Kỹ Thuật</option>
                                 <option value="thukho">Thủ Kho</option>

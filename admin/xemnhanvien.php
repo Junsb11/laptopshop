@@ -9,15 +9,16 @@
     $offset = ($page - 1) * $limit;
 
     // SQL query to fetch employee data with counts for approved invoices and handled warranty orders
-    $sql_xemnv = "SELECT nv.MaNV, nv.HoTen, nv.Email, nv.SDT, nv.VaiTro, nv.LuongCB, nv.TrangThai, nv.GhiChu,
-        IFNULL(SUM(CASE WHEN hd.TrangThai = 1 THEN 1 ELSE 0 END), 0) AS SoHoaDonDuyet,
-        IFNULL(SUM(CASE WHEN bh.TrangThai = 2 THEN 1 ELSE 0 END), 0) AS SoDonBaoHanh
-    FROM nhan_vien nv
-    LEFT JOIN hoa_don hd ON nv.MaNV = hd.MaNV
-    LEFT JOIN bao_hanh bh ON nv.MaNV = bh.MaNV
-    GROUP BY nv.MaNV 
-    ORDER BY nv.MaNV
-    LIMIT ?, ?";
+    $sql_xemnv = "
+        SELECT nv.MaNV, nv.HoTen, nv.Email, nv.SDT, nv.VaiTro, nv.LuongCB, nv.TrangThai, nv.GhiChu,
+            IFNULL(SUM(CASE WHEN hd.TrangThai = 1 THEN 1 ELSE 0 END), 0) AS SoHoaDonDuyet,
+            IFNULL(SUM(CASE WHEN bh.TrangThai = 2 THEN 1 ELSE 0 END), 0) AS SoDonBaoHanh
+        FROM nhan_vien nv
+        LEFT JOIN hoa_don hd ON nv.MaNV = hd.MaNV
+        LEFT JOIN bao_hanh bh ON nv.MaNV = bh.MaNV
+        GROUP BY nv.MaNV 
+        ORDER BY nv.MaNV
+        LIMIT ?, ?";
 
     $stmt = $conn->prepare($sql_xemnv);
     $stmt->bind_param("ii", $offset, $limit);
@@ -59,12 +60,25 @@
                     while ($data = $result_nv->fetch_assoc()) {                                  
                         $soHoaDonDuyet = $data['SoHoaDonDuyet'];
                         $soDonBaoHanh = $data['SoDonBaoHanh'];
-                        $tongDon = $soHoaDonDuyet + $soDonBaoHanh;
 
-                        // Fetch the number of working days for the current month
-                        $sql_chamcong = "SELECT COUNT(*) AS SoNgayLamViec FROM ChamCong WHERE MaNV = ? AND MONTH(Ngay) = MONTH(CURDATE()) AND YEAR(Ngay) = YEAR(CURDATE())";
+                        // Fetch the number of working days for the current month based on invoices and warranty orders
+                        $sql_chamcong = "SELECT COUNT(DISTINCT NgayThucHien) AS SoNgayLamViec
+    FROM (
+        SELECT DATE(hd.NgayDuyet) AS NgayThucHien
+        FROM hoa_don hd
+        WHERE hd.MaNV = ? AND hd.TrangThai = 1
+
+        UNION
+
+        SELECT DATE(bh.NgayHen) AS NgayThucHien
+        FROM bao_hanh bh
+        WHERE bh.MaNV = ? AND bh.TrangThai = 2
+    ) AS NgayLamViec
+    WHERE MONTH(NgayThucHien) = MONTH(CURDATE()) AND YEAR(NgayThucHien) = YEAR(CURDATE());
+";
+
                         $stmt_chamcong = $conn->prepare($sql_chamcong);
-                        $stmt_chamcong->bind_param("i", $data['MaNV']);
+                        $stmt_chamcong->bind_param("ii", $data['MaNV'], $data['MaNV']);
                         $stmt_chamcong->execute();
                         $result_chamcong = $stmt_chamcong->get_result();
                         $soNgayCong = $result_chamcong->fetch_assoc()['SoNgayLamViec'] ?? 0;
@@ -73,7 +87,7 @@
                         $luongThucTe = ($data['LuongCB'] / 30) * $soNgayCong;
 
                         // Apply a bonus multiplier if applicable
-                        $heSoThuong = ($tongDon >= 50) ? 1.1 : 1.0;
+                        $heSoThuong = ($soHoaDonDuyet + $soDonBaoHanh >= 50) ? 1.1 : 1.0;
                         $luongThucTe *= $heSoThuong;
                 ?>
                     <tr class="odd gradeX">

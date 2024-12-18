@@ -3,8 +3,8 @@ include 'inc/header.php';
 include 'inc/sidebar.php';
 include 'connect.php';
 
-$sql_xemkm = "SELECT km.MaKM, km.TenKM, km.TuNgay, km.DenNgay, km.TrangThai, 
-                     ctkm.MaSP, ctkm.TyLeKM, ctkm.GhiChu, ctkm.SoLuong
+$sql_xemkm = "SELECT km.MaKM, km.TenKM, ctkm.MaCode, km.TuNgay, km.DenNgay, km.TrangThai, 
+                     ctkm.TyLeKM, ctkm.GhiChu, ctkm.SoLuong
               FROM khuyen_mai km
               LEFT JOIN chi_tiet_khuyen_mai ctkm ON km.MaKM = ctkm.MaKM";
 
@@ -21,12 +21,11 @@ $result_dm = mysqli_query($conn, $sql_xemkm);
                         <tr>
                             <th>STT</th>
                             <th>Tên khuyến mãi</th>
+                            <th>Mã Code</th>
                             <th>Từ ngày</th>
                             <th>Đến ngày</th>
                             <th>Trạng thái</th>
-                            <th>Mã sản phẩm</th>
                             <th>Tỷ lệ khuyến mãi</th>
-                            <th>Ghi chú</th>
                             <th>Số lượng</th>
                             <th>Action</th>
                         </tr>
@@ -39,12 +38,11 @@ $result_dm = mysqli_query($conn, $sql_xemkm);
                         <tr class="odd gradeX">
                             <td><?php echo $stt++;?></td>
                             <td><?php echo $data['TenKM'];?></td>
+                            <td><?php echo $data['MaCode'];?></td>
                             <td><?php echo $data['TuNgay'];?></td>
                             <td><?php echo $data['DenNgay'];?></td>
                             <td><?php if ($data['TrangThai']) echo 'Đang hoạt động'; else echo 'Ngừng hoạt động';?></td>
-                            <td><?php echo $data['MaSP'];?></td>
                             <td><?php echo $data['TyLeKM'];?></td>
-                            <td><?php echo $data['GhiChu'];?></td>
                             <td><?php echo $data['SoLuong'];?></td>
                             <td>
                                 <a href="suakhuyenmai.php?id=<?php echo $data['MaKM']?>">Edit</a> || 

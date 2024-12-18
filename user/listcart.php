@@ -2,6 +2,52 @@
 session_start();
 include "./inc/header.php"; 
 include "./inc/navbar.php"; 
+include "../admin/connect.php";
+
+$tong = 0; // Initialize $tong
+$giamGia = 0; // Initialize $giamGia
+
+// Check if coupon code is set
+if (isset($_GET['maCode'])) {
+    $maCode = $_GET['maCode'];
+    $sql = "SELECT * FROM chi_tiet_khuyen_mai cm 
+            JOIN khuyen_mai km ON cm.MaKM = km.MaKM 
+            WHERE cm.MaCode = ? 
+              AND km.TuNgay <= CURDATE() 
+              AND km.DenNgay >= CURDATE()";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $maCode);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        if ($row['SoLuong'] > 0) {
+            $giamGia = $row['dongia'] * $row['TyLeKM'] / 100;
+
+            // Update coupon usage
+            $updateSql = "UPDATE chi_tiet_khuyen_mai SET SoLuong = SoLuong - 1 WHERE MaCode = ?";
+            $updateStmt = $conn->prepare($updateSql);
+            $updateStmt->bind_param("s", $maCode);
+            $updateStmt->execute();
+        } else {
+            $giamGia = 0; // If coupon quantity is zero or less
+        }
+    } else {
+        $giamGia = 0; // If coupon is invalid
+    }
+}
+
+// Calculate total and shipping
+if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
+    foreach ($_SESSION['cart'] as $ds) {
+        $thanhTien = $ds['dongia'] * $ds['sl'];
+        $tong += $thanhTien;
+    }
+}
+
+$ship = ($tong == 0) ? 0 : 30000;
+
 ?>
 
 <!-- Page Header Start -->
@@ -34,9 +80,9 @@ include "./inc/navbar.php";
                     </thead>
                     <tbody class="align-middle">
                     <?php 
-                    $tong = 0;
                     if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
                         foreach ($_SESSION['cart'] as $ds) {
+                            $thanhTien = $ds['dongia'] * $ds['sl'];
                     ?>
                         <tr>
                             <td class="align-middle">
@@ -59,13 +105,12 @@ include "./inc/navbar.php";
                                     </div>
                                 </div>
                             </td>
-                            <td class="align-middle"><?php echo number_format($ds['dongia'] * $ds['sl'], 0, '.', '.'); ?></td>
+                            <td class="align-middle"><?php echo number_format($thanhTien, 0, '.', '.'); ?></td>
                             <td class="align-middle">
                                 <a href="deletecart.php?id=<?php echo $ds['idsp']; ?>" class="btn btn-sm btn-primary"><i class="fa fa-times"></i></a>
                             </td>
                         </tr>
                     <?php 
-                        $tong += $ds['dongia'] * $ds['sl'];
                         } 
                     }
                     ?>                 
@@ -77,7 +122,7 @@ include "./inc/navbar.php";
         <div class="col-lg-4">
             <form class="mb-5" method="get" action="listcart.php">
                 <div class="input-group">
-                    <input type="text" class="form-control p-4" placeholder="Mã giảm giá">
+                    <input type="text" class="form-control p-4" placeholder="Mã giảm giá" name="maCode">
                     <div class="input-group-append">
                         <button class="btn btn-primary">Áp dụng mã</button>
                     </div>
@@ -89,23 +134,20 @@ include "./inc/navbar.php";
                     </div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-3 pt-1">
-                            <h6 class="font-weight-medium">Tổng tiền</h6>
+                            <h6 class="font-weight-medium">Giá Sản Phẩm</h6>
                             <h6 class="font-weight-medium"><?php echo number_format($tong, 0, '.', '.'); ?> vnđ</h6>
                         </div>
                         <div class="d-flex justify-content-between">
                             <h6 class="font-weight-medium">Phí vận chuyển</h6>
                             <h6 class="font-weight-medium">
-                                <?php 
-                                $ship = ($tong == 0) ? 0 : 30000;
-                                echo number_format($ship, 0, '.', '.'); 
-                                ?> vnđ
+                                <?php echo number_format($ship, 0, '.', '.'); ?> vnđ
                             </h6>
                         </div>
                     </div>
                     <div class="card-footer border-secondary bg-transparent">
                         <div class="d-flex justify-content-between mt-2">
                             <h5 class="font-weight-bold">Tổng cộng</h5>
-                            <h5 class="font-weight-bold"><?php echo number_format($tong + $ship, 0, '.', '.'); ?> vnđ</h5>
+                            <h5 class="font-weight-bold"><?php echo number_format($tong + $ship - $giamGia, 0, '.', '.'); ?> vnđ</h5>
                         </div>
                         <button name="btnthanhtoan" class="btn btn-block btn-primary my-3 py-3">Thanh Toán</button>
                     </div>

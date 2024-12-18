@@ -30,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $tungay = trim($_POST['tungay']);
     $denngay = trim($_POST['denngay']);
     $trangthai = isset($_POST['trangthai']) ? intval($_POST['trangthai']) : 0;
+    $soluong = isset($_POST['soluong']) ? intval($_POST['soluong']) : 0; // Thêm cột SoLuong
 
     // Kiểm tra dữ liệu nhập vào
     if (empty($tenkm) || empty($tungay) || empty($denngay)) {
@@ -41,21 +42,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         header("Location: themmoikhuyenmai.php");
         exit;
     } else {
-        // Chèn dữ liệu vào bảng khuyến mãi
+        // Chèn dữ liệu vào bảng chi tiết khuyến mãi
         try {
-            $stmt = $conn->prepare("INSERT INTO khuyen_mai (TenKM, TuNgay, DenNgay, TrangThai) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("sssi", $tenkm, $tungay, $denngay, $trangthai);
+            $stmt = $conn->prepare("INSERT INTO chi_tiet_khuyen_mai (MaKM, TyLeKM, GhiChu, SoLuong) VALUES (?, ?, ?, ?)");
+            $stmt->bind_param("isii", $tenkm, $tungay, $denngay, $soluong); // Thêm SoLuong
 
             if ($stmt->execute()) {
-                $_SESSION['notification'] = "<p class='success'>Thêm mới khuyến mãi thành công!</p>";
+                $_SESSION['notification'] = "<p class='success'>Thêm mới chi tiết khuyến mãi thành công!</p>";
             } else {
-                throw new Exception("Lỗi khi thêm khuyến mãi: " . $stmt->error);
+                throw new Exception("Lỗi khi thêm chi tiết khuyến mãi: " . $stmt->error);
             }
 
             $stmt->close();
         } catch (Exception $e) {
             error_log($e->getMessage());
-            $_SESSION['notification'] = "<p class='error'>Lỗi khi thêm khuyến mãi. Vui lòng thử lại sau!</p>";
+            $_SESSION['notification'] = "<p class='error'>Lỗi khi thêm chi tiết khuyến mãi. Vui lòng thử lại sau!</p>";
         }
         
         header("Location: themmoikhuyenmai.php");
@@ -70,7 +71,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <div class="block">               
 
             <?php echo $notification; ?>
-
             <form action="" method="post">
                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                 <table class="form">
@@ -85,6 +85,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <tr>
                         <td><label for="denngay">Đến ngày:</label></td>
                         <td><input type="date" name="denngay" id="denngay" required /></td>
+                    </tr>
+                    <tr>
+                        <td><label for="soluong">Số lượng:</label></td>
+                        <td><input type="number" name="soluong" id="soluong" placeholder="Nhập số lượng" required /></td>
                     </tr>
                     <tr>
                         <td><label for="trangthai">Trạng thái:</label></td>

@@ -8,7 +8,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $sql_insert_review = "INSERT INTO danhgia (MaSP, SoSao, NoiDung, TenDangNhap, NgayDG) VALUES (?, ?, ?, ?, NOW())";
     $stmt = $conn->prepare($sql_insert_review);
-    $stmt->bind_param('iiss', $idsp, $rating, $comment, $_SESSION['username']);
+    $stmt->bind_param('iiss', $idsp, $rating, $comment, $_SESSION['TenDangNhap']);
     $stmt->execute();
 
     header("Location: chitietsp.php?id=$idsp");

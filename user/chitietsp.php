@@ -77,14 +77,14 @@ if ($result_chitietsp && $result_chitietsp->num_rows > 0) {
             <h3 class="font-weight-semi-bold"><?php echo htmlspecialchars($data['TenSP']); ?></h3>
             <!-- Rating Stars -->
             <div class="d-flex mb-3">
-                <div class="text-primary mr-2">
+                <div class="text-primary mr-2 rating-stars">
                     <?php for ($i = 0; $i < 5; $i++) {
                         if ($avg_star - $i >= 1) { ?>
-                            <small class="fas fa-star"></small>
+                            <i class="fas fa-star"></i>
                         <?php } elseif ($avg_star - $i >= 0.5) { ?>
-                            <small class="fas fa-star-half-alt"></small>
+                            <i class="fas fa-star-half-alt"></i>
                         <?php } else { ?>
-                            <small class="far fa-star"></small>
+                            <i class="far fa-star"></i>
                         <?php } 
                     } ?>
                 </div>
@@ -149,11 +149,11 @@ if ($result_chitietsp && $result_chitietsp->num_rows > 0) {
                                         <div class="text-primary mb-2">
                                             <?php for ($i = 0; $i < 5; $i++) {
                                                 if ($dg['SoSao'] - $i >= 1) { ?>
-                                                    <small class="fas fa-star"></small>
+                                                    <i class="fas fa-star"></i>
                                                 <?php } elseif ($dg['SoSao'] - $i >= 0.5) { ?>
-                                                    <small class="fas fa-star-half-alt"></small>
+                                                    <i class="fas fa-star-half-alt"></i>
                                                 <?php } else { ?>
-                                                    <small class="far fa-star"></small>
+                                                    <i class="far fa-star"></i>
                                                 <?php } 
                                             } ?>
                                         </div>
